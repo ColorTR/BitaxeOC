@@ -1,0 +1,20 @@
+<Files "analyze.php">
+    Require all granted
+    <LimitExcept POST>
+        Require all denied
+    </LimitExcept>
+</Files>
+
+<Files "share.php">
+    Require all granted
+    <LimitExcept GET POST>
+        Require all denied
+    </LimitExcept>
+</Files>
+
+<Files "log-usage.php">
+    Require all granted
+    <LimitExcept POST>
+        Require all denied
+    </LimitExcept>
+</Files>

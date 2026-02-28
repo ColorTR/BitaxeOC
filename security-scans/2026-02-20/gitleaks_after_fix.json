@@ -1,0 +1,42 @@
+[
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 1,
+  "EndLine": 1,
+  "StartColumn": 15,
+  "EndColumn": 47,
+  "Match": "token\":\"8f9613cb8c0f940dbb2f2d70\"",
+  "Secret": "8f9613cb8c0f940dbb2f2d70",
+  "File": "/repo/storage/shares/8f/8f9613cb8c0f940dbb2f2d70.json",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 3.5739348,
+  "Author": "",
+  "Email": "",
+  "Date": "",
+  "Message": "",
+  "Tags": [],
+  "Fingerprint": "/repo/storage/shares/8f/8f9613cb8c0f940dbb2f2d70.json:generic-api-key:1"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 1,
+  "EndLine": 1,
+  "StartColumn": 15,
+  "EndColumn": 47,
+  "Match": "token\":\"d37962a7d8c5de4a7d8b11f2\"",
+  "Secret": "d37962a7d8c5de4a7d8b11f2",
+  "File": "/repo/storage/shares/d3/d37962a7d8c5de4a7d8b11f2.json",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 3.7201755,
+  "Author": "",
+  "Email": "",
+  "Date": "",
+  "Message": "",
+  "Tags": [],
+  "Fingerprint": "/repo/storage/shares/d3/d37962a7d8c5de4a7d8b11f2.json:generic-api-key:1"
+ }
+]

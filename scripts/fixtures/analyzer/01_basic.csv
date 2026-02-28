@@ -1,0 +1,4 @@
+Voltage (mV),Frequency (MHz),AverageHashrate (GH/s),Efficiency (J/TH),averageTemperature,averageVRTemp,Error Rate (%),AveragePower (W)
+1270,832.50,3426,16.11,51.2,60.1,0.46,55.2
+1380,1088.75,4523,18.78,60.0,70.0,7.98,84.9
+1240,750.00,3051,15.61,49.5,58.4,0.32,47.6

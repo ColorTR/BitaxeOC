@@ -1,0 +1,3 @@
+Core Voltage (mV);Frequency MHz;Efficiency (J/TH);Temp(C);AveragePower (W);Error Rate
+1260;760;16.00;53;48;0.55
+1280;800;15.50;54;50;0.60

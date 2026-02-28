@@ -1,0 +1,22 @@
+# OS
+.DS_Store
+
+# Runtime / generated
+/tmp/
+/storage/
+/zip_backups/
+
+# Local heavy test/demo datasets
+/bench/
+/demo/
+
+# Secrets
+/deploy.env
+/.deploy.env
+/.env
+/app/.db_password
+/app/Config.local.php
+
+# Logs and temp artifacts
+*.log
+*.tmp

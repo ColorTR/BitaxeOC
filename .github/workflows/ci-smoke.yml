@@ -1,0 +1,44 @@
+name: CI Smoke
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - 'codex/**'
+  pull_request:
+
+jobs:
+  php-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mbstring, json, pdo, pdo_mysql
+          coverage: none
+
+      - name: Lint PHP files
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=$(find app api -type f -name "*.php" | sort)
+          if [ -z "$files" ]; then
+            echo "No PHP files found."
+            exit 0
+          fi
+          while IFS= read -r f; do
+            php -l "$f"
+          done <<< "$files"
+
+      - name: Backend unit + smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          php scripts/backend-unit.php
+          php scripts/backend-smoke.php
+          php scripts/analyzer-fixtures.php
