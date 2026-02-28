@@ -90,6 +90,18 @@ A change is done only if:
   - ops panel auth and server status protections
 5. If user requested master, trigger master backup flow after green tests.
 
+## 9.1) GitHub Backup Workflow (Mandatory)
+
+1. Repo scope is only this project: `ColorTR/BitaxeOC` (private).
+2. For every code/config change in this project:
+  - commit locally
+  - push to `main`
+3. When user marks a version as `master`:
+  - create/update version tag (`vNNN`)
+  - publish private GitHub Release for that tag
+  - attach master backup zip asset (`bitaxe-oc_master_backend_vNNN.zip`)
+4. Do not touch other repositories/projects unless explicitly requested.
+
 ## 10) App Incident Rollback Checklist
 
 1. Lock release activity and identify last known good version.
