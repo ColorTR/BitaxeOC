@@ -249,3 +249,4 @@
 - v303: Ops panelde `ZZ/unknown` gorunen ulke-dil loglari icin kalici telemetry duzeltmesi yapildi; frontend usage payload'ina browser dil/ulke/zaman bilgisi eklendi ve backendde `country_hint` + browser-language fallback katmani devreye alindi.
 - v304: P0 refactor baslatildi; API endpointlerdeki tekrar eden runtime/context/POST+same-origin bootstrap akisi `ApiBootstrap` yardimcilarina merkezilestirildi ve P0/P1 patch+acceptance plani eklendi.
 - v305: P0-2 ilk dilim tamamlandi; ops-panel icindeki DB metrik/sorgu yardimcilari `app/OpsDbMetrics.php` servisine tasinip panel fonksiyonlari servis delegasyonuna cevrildi (davranis degismeden).
+- v306: P0-2 ikinci dilim tamamlandi; ops-panel process toplama ve cache akislari `app/OpsProcessMetrics.php` servisine tasinip `collectTopProcessMetrics*` fonksiyonlari servis delegasyonuna alindi.
