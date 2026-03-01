@@ -347,24 +347,12 @@ final class ShareStore
         }
 
         $pdo = $this->getDbConnection();
-        $tableSql = $this->quotedDbTable();
-        $now = time();
-
-        $sql = "SELECT token, payload_sha1, payload_body, payload_encoding, created_at, expires_at FROM {$tableSql} WHERE token = :token LIMIT 1";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([':token' => $normalizedToken]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!is_array($row)) {
+        $row = $this->findActiveShareRowByTokenDb($pdo, $normalizedToken, true);
+        if ($row === null) {
             return null;
         }
 
         $expiresTs = $this->parseDbDateTime((string)($row['expires_at'] ?? ''));
-        if ($expiresTs <= 0 || $expiresTs <= $now) {
-            $deleteStmt = $pdo->prepare("DELETE FROM {$tableSql} WHERE token = :token");
-            $deleteStmt->execute([':token' => $normalizedToken]);
-            return null;
-        }
-
         $payload = $this->decodePayloadFromDb(
             (string)($row['payload_encoding'] ?? 'json'),
             (string)($row['payload_body'] ?? '')
@@ -373,15 +361,7 @@ final class ShareStore
             return null;
         }
 
-        try {
-            $touchStmt = $pdo->prepare("UPDATE {$tableSql} SET last_access_at = :last_access_at, access_count = access_count + 1 WHERE token = :token");
-            $touchStmt->execute([
-                ':last_access_at' => $this->dbDateTime($now),
-                ':token' => $normalizedToken,
-            ]);
-        } catch (Throwable) {
-            // Access stats are best-effort.
-        }
+        $this->touchShareAccessStatsDb($pdo, $normalizedToken, time(), null);
 
         $createdTs = $this->parseDbDateTime((string)($row['created_at'] ?? ''));
 
@@ -402,33 +382,13 @@ final class ShareStore
         }
 
         $pdo = $this->getDbConnection();
-        $tableSql = $this->quotedDbTable();
-        $now = time();
-
-        $sql = "SELECT token, payload_sha1, created_at, expires_at FROM {$tableSql} WHERE token = :token LIMIT 1";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([':token' => $normalizedToken]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!is_array($row)) {
+        $row = $this->findActiveShareRowByTokenDb($pdo, $normalizedToken, false);
+        if ($row === null) {
             return null;
         }
-
         $expiresTs = $this->parseDbDateTime((string)($row['expires_at'] ?? ''));
-        if ($expiresTs <= 0 || $expiresTs <= $now) {
-            $deleteStmt = $pdo->prepare("DELETE FROM {$tableSql} WHERE token = :token");
-            $deleteStmt->execute([':token' => $normalizedToken]);
-            return null;
-        }
 
-        try {
-            $touchStmt = $pdo->prepare("UPDATE {$tableSql} SET last_access_at = :last_access_at, access_count = access_count + 1 WHERE token = :token");
-            $touchStmt->execute([
-                ':last_access_at' => $this->dbDateTime($now),
-                ':token' => $normalizedToken,
-            ]);
-        } catch (Throwable $error) {
-            $this->logRecoverable('getShareMetaDb.touch', $error);
-        }
+        $this->touchShareAccessStatsDb($pdo, $normalizedToken, time(), 'getShareMetaDb.touch');
 
         $createdTs = $this->parseDbDateTime((string)($row['created_at'] ?? ''));
         return [
@@ -437,6 +397,47 @@ final class ShareStore
             'expiresAt' => gmdate('c', $expiresTs),
             'payloadSha1' => (string)($row['payload_sha1'] ?? ''),
         ];
+    }
+
+    private function findActiveShareRowByTokenDb(PDO $pdo, string $token, bool $includePayload): ?array
+    {
+        $tableSql = $this->quotedDbTable();
+        $columns = $includePayload
+            ? 'token, payload_sha1, payload_body, payload_encoding, created_at, expires_at'
+            : 'token, payload_sha1, created_at, expires_at';
+
+        $sql = "SELECT {$columns} FROM {$tableSql} WHERE token = :token LIMIT 1";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':token' => $token]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!is_array($row)) {
+            return null;
+        }
+
+        $expiresTs = $this->parseDbDateTime((string)($row['expires_at'] ?? ''));
+        if ($expiresTs <= 0 || $expiresTs <= time()) {
+            $deleteStmt = $pdo->prepare("DELETE FROM {$tableSql} WHERE token = :token");
+            $deleteStmt->execute([':token' => $token]);
+            return null;
+        }
+
+        return $row;
+    }
+
+    private function touchShareAccessStatsDb(PDO $pdo, string $token, int $nowTs, ?string $recoverableTag): void
+    {
+        $tableSql = $this->quotedDbTable();
+        try {
+            $touchStmt = $pdo->prepare("UPDATE {$tableSql} SET last_access_at = :last_access_at, access_count = access_count + 1 WHERE token = :token");
+            $touchStmt->execute([
+                ':last_access_at' => $this->dbDateTime($nowTs),
+                ':token' => $token,
+            ]);
+        } catch (Throwable $error) {
+            if ($recoverableTag !== null && $recoverableTag !== '') {
+                $this->logRecoverable($recoverableTag, $error);
+            }
+        }
     }
 
     private function encodePayloadForDb(string $payloadJson): array

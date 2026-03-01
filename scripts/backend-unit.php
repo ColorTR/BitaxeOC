@@ -375,6 +375,106 @@ $run('ShareStore file dedupe + meta integrity', static function (): string {
     return 'dedupe ok';
 });
 
+$run('ShareStore DB mode file fallback create/read/meta/dedupe', static function (): string {
+    $tmpRel = 'tmp/unit_shares_db_fallback_' . bin2hex(random_bytes(4));
+    $root = dirname(__DIR__);
+    $tmpAbs = $root . '/' . $tmpRel;
+
+    $cfg = [
+        'enabled' => true,
+        'driver' => 'db',
+        'storage_dir' => $tmpRel,
+        'file_fallback_read' => true,
+        'token_bytes' => 12,
+        'default_ttl_sec' => 3600,
+        'max_ttl_sec' => 7200,
+        'max_payload_bytes' => 1024 * 1024,
+        'max_rows' => 2000,
+        'max_shares' => 5000,
+        'max_storage_bytes' => 128 * 1024 * 1024,
+        'db' => [
+            'engine' => 'mysql',
+            'dsn' => 'mysql:host=127.0.0.1;port=65000;dbname=bitaxe_missing',
+            'username' => 'missing_user',
+            'password' => 'missing_pass',
+            'table' => 'share_records_unit_missing',
+            'charset' => 'utf8mb4',
+        ],
+    ];
+
+    $store = new ShareStore($cfg, $root);
+    $payload = [
+        'consolidatedData' => [[
+            'source' => 'master',
+            'v' => 1270,
+            'f' => 832.5,
+            'h' => 3426,
+            'e' => 16.11,
+            'err' => 0.46,
+            'p' => 55.19,
+            'score' => 97,
+            'vr' => 51.2,
+            't' => 44.0,
+        ]],
+        'meta' => ['appVersion' => 'v-unit-fallback'],
+    ];
+
+    try {
+        $first = $store->createShare($payload, null);
+        $token = (string)($first['token'] ?? '');
+        if ($token === '' || !preg_match('/^[a-f0-9]{24}$/', $token)) {
+            throw new RuntimeException('fallback create token invalid');
+        }
+        if (!empty($first['reused'])) {
+            throw new RuntimeException('first fallback create should not be reused');
+        }
+
+        $second = $store->createShare($payload, null);
+        if (empty($second['reused']) || (string)$second['token'] !== $token) {
+            throw new RuntimeException('fallback dedupe mismatch');
+        }
+
+        $record = $store->getShare($token);
+        if (!is_array($record) || !is_array($record['payload']['consolidatedData'] ?? null)) {
+            throw new RuntimeException('fallback getShare payload missing');
+        }
+
+        $meta = $store->getShareMeta($token);
+        if (!is_array($meta) || trim((string)($meta['payloadSha1'] ?? '')) === '') {
+            throw new RuntimeException('fallback meta payload sha missing');
+        }
+
+        $unknownToken = str_repeat('f', 24);
+        if ($unknownToken === $token) {
+            $unknownToken = str_repeat('e', 24);
+        }
+        if ($store->getShare($unknownToken) !== null) {
+            throw new RuntimeException('fallback unknown getShare should be null');
+        }
+        if ($store->getShareMeta($unknownToken) !== null) {
+            throw new RuntimeException('fallback unknown getShareMeta should be null');
+        }
+    } finally {
+        if (is_dir($tmpAbs)) {
+            $it = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($tmpAbs, FilesystemIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($it as $entry) {
+                /** @var SplFileInfo $entry */
+                if ($entry->isDir()) {
+                    @rmdir($entry->getPathname());
+                } else {
+                    @unlink($entry->getPathname());
+                }
+            }
+            @rmdir($tmpAbs);
+        }
+    }
+
+    return 'fallback path ok';
+});
+
 $run('UsageLogger file append + summary', static function (): string {
     $root = dirname(__DIR__);
     $suffix = bin2hex(random_bytes(4));

@@ -38,6 +38,8 @@ Bu plan, davranis degisikligi yaratmadan kod tabanini bolerek daha guvenli gelis
 ### P0-3: ShareStore write/read yollarini test-first sabitle
 - Hedef:
   - `createShareDb/getShareDb/getShareMetaDb` etrafinda regression testlerini guclendirmek
+- Durum:
+  - v307: DB driver + file fallback create/read/meta/dedupe/unknown-token unit testi eklendi; `getShareDb/getShareMetaDb` icindeki DB row fetch+expiry purge+touch akisinda ortak yardimci metodlara gecilerek query path sadelelestirildi.
 - Patch plan:
   1. mevcut backend-unit fixture'larini DB fallback + dedupe senaryolariyla genislet
   2. davranis degismeden query path sadeleştir
