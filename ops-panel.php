@@ -2629,6 +2629,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
             let filtered = allEntries.slice();
             let lastProcessRows = [];
             let lastServerView = null;
+            let lastDbHealthSignature = '';
             const runsSortState = { key: 'createdAt', dir: 'desc' };
             const procSortState = { key: 'cpuPct', dir: 'desc' };
             const runColumnKeys = ['createdAt', 'status', 'analysisMs', 'filesProcessed', 'bytesProcessed', 'rowsTotal', 'country', 'language', 'theme', 'sourceApi'];
@@ -3518,16 +3519,24 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                 const sharesValue = parseNumberLoose(rows.sharesLabel || 0);
                 const usageMb = parseNumberLoose((db.meta || '').split('|')[0] || 0);
                 const shareMb = parseNumberLoose((db.meta || '').split('|')[1] || 0);
-
-                destroyChart(charts.dbHealth);
+                const labels = ['log rows', 'share rows', 'logs MB', 'shares MB'];
+                const values = [logsValue, sharesValue, usageMb, shareMb];
+                const nextSignature = [
+                    database.schema || '-',
+                    database.version || '-',
+                    dbTotal,
+                    rows.logsLabel || '-',
+                    rows.sharesLabel || '-',
+                    values.map((v) => Number(v || 0).toFixed(3)).join('|'),
+                ].join('::');
                 const dbCtx = document.getElementById('chart-db-health');
-                if (dbCtx) {
+                if (dbCtx && !charts.dbHealth) {
                     charts.dbHealth = new Chart(dbCtx, {
                         type: 'bar',
                         data: {
-                            labels: ['log rows', 'share rows', 'logs MB', 'shares MB'],
+                            labels,
                             datasets: [{
-                                data: [logsValue, sharesValue, usageMb, shareMb],
+                                data: values,
                                 backgroundColor: ['rgba(99,102,241,0.6)', 'rgba(34,197,94,0.6)', 'rgba(14,165,233,0.6)', 'rgba(245,158,11,0.6)'],
                                 borderColor: ['#818cf8', '#22c55e', '#0ea5e9', '#f59e0b'],
                                 borderWidth: 1,
@@ -3535,6 +3544,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                             }],
                         },
                         options: {
+                            animation: false,
                             responsive: true,
                             maintainAspectRatio: false,
                             scales: {
@@ -3547,7 +3557,24 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                             },
                         },
                     });
+                    lastDbHealthSignature = nextSignature;
+                    return;
                 }
+
+                if (!charts.dbHealth) {
+                    return;
+                }
+
+                if (lastDbHealthSignature === nextSignature) {
+                    return;
+                }
+
+                charts.dbHealth.data.labels = labels;
+                if (Array.isArray(charts.dbHealth.data.datasets) && charts.dbHealth.data.datasets[0]) {
+                    charts.dbHealth.data.datasets[0].data = values;
+                }
+                charts.dbHealth.update('none');
+                lastDbHealthSignature = nextSignature;
             }
 
             function renderAlertCenter(stats, sli) {
