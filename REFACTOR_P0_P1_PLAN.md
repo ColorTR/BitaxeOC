@@ -54,12 +54,16 @@ Bu plan, davranis degisikligi yaratmadan kod tabanini bolerek daha guvenli gelis
   - `Security.php` icindeki country lookup, transient store, rate limit, replay modullerini ayirmak
 - Yol:
   - facade korunur (`Security::...` imzalari ayni kalir), alt implementasyon siniflara tasinir
+- Durum:
+  - v308: `SecurityCountryLookup` ve `SecurityTransientStore` siniflari eklendi; `Security::detectCountryCode`, `Security::assertReplayProtection`, `Security::applyRateLimitConfig` ve legacy `applyRateLimit` bu alt modullere delegasyon ile calisacak sekilde parcali yapıya alindi.
 - Acceptance:
   - API endpoint security davranislari birebir kalir
 
 ### P1-2: UsageLogger adapter ayrimi
 - Hedef:
   - file/db path ayrimini adapter seviyesine indirmek (`UsageLoggerDbAdapter`, `UsageLoggerFileAdapter`)
+- Durum:
+  - v308: `UsageLoggerAdapter` interface + `UsageLoggerDbAdapter`/`UsageLoggerFileAdapter` eklendi; `append/readLatest/summarizeAll` akisi adapter dispatch + db->file fallback modeliyle merkezilestirildi.
 - Acceptance:
   - summary/read/append sonuclari oncekiyle uyumlu
   - fallback event kaydi korunur

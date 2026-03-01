@@ -251,3 +251,4 @@
 - v305: P0-2 ilk dilim tamamlandi; ops-panel icindeki DB metrik/sorgu yardimcilari `app/OpsDbMetrics.php` servisine tasinip panel fonksiyonlari servis delegasyonuna cevrildi (davranis degismeden).
 - v306: P0-2 ikinci dilim tamamlandi; ops-panel process toplama ve cache akislari `app/OpsProcessMetrics.php` servisine tasinip `collectTopProcessMetrics*` fonksiyonlari servis delegasyonuna alindi.
 - v307: P0-3 baslatildi; ShareStore icin DB-driver + file-fallback create/read/meta/dedupe/unknown-token unit test kapsami genisletildi ve DB token okuma/touch query path'i davranis degismeden ortak yardimcilara sadelelestirildi.
+- v308: P1 tamamlandi; Security modulu country/transient alt servislerine bolundu ve UsageLogger driver dispatch akisi `UsageLoggerAdapter` + file/db adapter katmani ile ayrilarak fallback davranisi korunup merkezilestirildi.

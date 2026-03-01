@@ -9,6 +9,9 @@ use PDOException;
 use RuntimeException;
 use Throwable;
 
+require_once __DIR__ . '/SecurityCountryLookup.php';
+require_once __DIR__ . '/SecurityTransientStore.php';
+
 final class HttpException extends RuntimeException
 {
     public int $statusCode;
@@ -161,64 +164,14 @@ final class Security
         string $incomingNonce,
         ?string $clientIdentity = null
     ): void {
-        $scopeName = trim($scope) !== '' ? trim($scope) : 'default';
-        $windowSec = max(5, (int)($securityConfig['replay_window_sec'] ?? 180));
-        $nonceTtlSec = max($windowSec, (int)($securityConfig['replay_nonce_ttl_sec'] ?? 900));
-
-        $timestampRaw = trim($incomingTimestamp);
-        if ($timestampRaw === '' || !preg_match('/^[0-9]{10}$/', $timestampRaw)) {
-            throw new HttpException('Gecersiz istek zamani.', 400);
-        }
-
-        $requestTs = (int)$timestampRaw;
-        $now = time();
-        if (abs($now - $requestTs) > $windowSec) {
-            throw new HttpException('Istek zamani asimina ugradi.', 408);
-        }
-
-        $nonce = trim($incomingNonce);
-        if (
-            $nonce === '' ||
-            strlen($nonce) < 16 ||
-            strlen($nonce) > 128 ||
-            !preg_match('/^[A-Za-z0-9_.:\-]+$/', $nonce)
-        ) {
-            throw new HttpException('Gecersiz istek nonce degeri.', 400);
-        }
-
-        $identity = trim((string)$clientIdentity);
-        if ($identity === '') {
-            $identity = self::getClientIp(false);
-        }
-        if ($identity === '') {
-            $identity = '0.0.0.0';
-        }
-
-        if (self::transientStoreMode($securityConfig) === 'db') {
-            try {
-                self::assertReplayProtectionDb(
-                    $securityConfig,
-                    $scopeName,
-                    substr($identity, 0, 220),
-                    $requestTs,
-                    $nonce,
-                    $nonceTtlSec
-                );
-                return;
-            } catch (HttpException $error) {
-                if (!self::shouldTransientFallbackToFile($securityConfig)) {
-                    throw $error;
-                }
-                self::logTransientStoreFailure('replay-db-http', $error);
-            } catch (Throwable $error) {
-                if (!self::shouldTransientFallbackToFile($securityConfig)) {
-                    throw new HttpException('Replay korumasi baslatilamadi.', 503);
-                }
-                self::logTransientStoreFailure('replay-db-fallback', $error);
-            }
-        }
-
-        self::assertReplayProtectionFile($scopeName, $identity, $requestTs, $nonce, $nonceTtlSec, $now);
+        SecurityTransientStore::assertReplayProtection(
+            $securityConfig,
+            $scope,
+            $incomingTimestamp,
+            $incomingNonce,
+            $clientIdentity,
+            static fn (): string => self::getClientIp(false)
+        );
     }
 
     public static function getClientIp(bool $trustProxyHeaders = false, array $securityConfig = []): string
@@ -252,66 +205,12 @@ final class Security
 
     public static function detectCountryCode(bool $trustProxyHeaders = false, array $securityConfig = []): string
     {
-        if (self::isTrustedProxyRequest($trustProxyHeaders, $securityConfig)) {
-            $headerCandidates = [
-                (string)($_SERVER['HTTP_CF_IPCOUNTRY'] ?? ''),
-                (string)($_SERVER['HTTP_CLOUDFRONT_VIEWER_COUNTRY'] ?? ''),
-                (string)($_SERVER['HTTP_X_COUNTRY_CODE'] ?? ''),
-                (string)($_SERVER['HTTP_X_APPENGINE_COUNTRY'] ?? ''),
-                (string)($_SERVER['GEOIP_COUNTRY_CODE'] ?? ''),
-            ];
-
-            foreach ($headerCandidates as $candidate) {
-                $normalized = self::normalizeCountryCode($candidate);
-                if ($normalized !== 'ZZ') {
-                    return $normalized;
-                }
-            }
-        }
-
-        if (function_exists('geoip_country_code_by_name')) {
-            $ip = self::getClientIp($trustProxyHeaders, $securityConfig);
-            if ($ip !== '' && $ip !== '0.0.0.0') {
-                $geoipCode = @geoip_country_code_by_name($ip);
-                if (is_string($geoipCode)) {
-                    $normalized = self::normalizeCountryCode($geoipCode);
-                    if ($normalized !== 'ZZ') {
-                        return $normalized;
-                    }
-                }
-            }
-        }
-
-        $remoteEnabled = !empty($securityConfig['country_lookup_remote']);
-        if ($remoteEnabled) {
-            $ip = self::getClientIp($trustProxyHeaders, $securityConfig);
-            if (
-                filter_var($ip, FILTER_VALIDATE_IP) &&
-                !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)
-            ) {
-                // Private/reserved range: remote lookup is meaningless.
-                return 'ZZ';
-            }
-
-            if (filter_var($ip, FILTER_VALIDATE_IP)) {
-                $successTtl = max(60, (int)($securityConfig['country_lookup_cache_ttl_sec'] ?? (30 * 24 * 3600)));
-                $failTtl = max(30, (int)($securityConfig['country_lookup_fail_ttl_sec'] ?? 600));
-                $cached = self::readCountryLookupCacheEntry($ip);
-                if ($cached !== null) {
-                    return $cached;
-                }
-
-                $timeoutSec = max(0.2, min(3.0, (float)($securityConfig['country_lookup_timeout_sec'] ?? 1.0)));
-                $remoteCode = self::lookupCountryCodeRemote($ip, $timeoutSec);
-                $ttl = $remoteCode === 'ZZ' ? $failTtl : $successTtl;
-                self::writeCountryLookupCacheEntry($ip, $remoteCode, $ttl);
-                if ($remoteCode !== 'ZZ') {
-                    return $remoteCode;
-                }
-            }
-        }
-
-        return 'ZZ';
+        return SecurityCountryLookup::detectCountryCode(
+            $trustProxyHeaders,
+            $securityConfig,
+            static fn (bool $trustProxyHeadersInner, array $securityConfigInner): bool => self::isTrustedProxyRequest($trustProxyHeadersInner, $securityConfigInner),
+            static fn (bool $trustProxyHeadersInner, array $securityConfigInner): string => self::getClientIp($trustProxyHeadersInner, $securityConfigInner)
+        );
     }
 
     public static function applyRateLimit(
@@ -324,17 +223,13 @@ final class Security
             return;
         }
 
-        $scopeName = trim($scope) !== '' ? trim($scope) : 'default';
-        $identity = trim((string)$clientIdentity);
-        if ($identity === '') {
-            $identity = self::getClientIp(false);
-        }
-        if ($identity === '') {
-            $identity = '0.0.0.0';
-        }
-
-        // Legacy callers keep file behavior. New callers should use applyRateLimitConfig.
-        self::applyRateLimitFile($scopeName, $limit, $windowSec, $identity, dirname(__DIR__));
+        SecurityTransientStore::applyRateLimitLegacyFile(
+            $scope,
+            $limit,
+            $windowSec,
+            $clientIdentity,
+            static fn (): string => self::getClientIp(false)
+        );
     }
 
     public static function applyRateLimitConfig(
@@ -344,37 +239,14 @@ final class Security
         int $windowSec,
         ?string $clientIdentity = null
     ): void {
-        if ($limit <= 0 || $windowSec <= 0) {
-            return;
-        }
-
-        $scopeName = trim($scope) !== '' ? trim($scope) : 'default';
-        $identity = trim((string)$clientIdentity);
-        if ($identity === '') {
-            $identity = self::getClientIp(false);
-        }
-        if ($identity === '') {
-            $identity = '0.0.0.0';
-        }
-
-        if (self::transientStoreMode($securityConfig) === 'db') {
-            try {
-                self::applyRateLimitDb($securityConfig, $scopeName, $limit, $windowSec, substr($identity, 0, 200));
-                return;
-            } catch (HttpException $error) {
-                if (!self::shouldTransientFallbackToFile($securityConfig)) {
-                    throw $error;
-                }
-                self::logTransientStoreFailure('ratelimit-db-http', $error);
-            } catch (Throwable $error) {
-                if (!self::shouldTransientFallbackToFile($securityConfig)) {
-                    throw new HttpException('Rate limit kontrolu baslatilamadi.', 503);
-                }
-                self::logTransientStoreFailure('ratelimit-db-fallback', $error);
-            }
-        }
-
-        self::applyRateLimitFile($scopeName, $limit, $windowSec, $identity, dirname(__DIR__));
+        SecurityTransientStore::applyRateLimitConfig(
+            $securityConfig,
+            $scope,
+            $limit,
+            $windowSec,
+            $clientIdentity,
+            static fn (): string => self::getClientIp(false)
+        );
     }
 
     private static function applyRateLimitFile(

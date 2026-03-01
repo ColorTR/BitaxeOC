@@ -8,6 +8,8 @@ use PDO;
 use PDOException;
 use Throwable;
 
+require_once __DIR__ . '/UsageLoggerAdapter.php';
+
 final class UsageLogger
 {
     private bool $enabled;
@@ -35,6 +37,8 @@ final class UsageLogger
     private int $dbRetentionDays;
     private ?PDO $pdo = null;
     private bool $dbSchemaReady = false;
+    private UsageLoggerAdapter $primaryAdapter;
+    private ?UsageLoggerAdapter $fallbackAdapter = null;
 
     public function __construct(array $loggingConfig, ?string $rootDir = null)
     {
@@ -71,6 +75,32 @@ final class UsageLogger
         $this->dbPruneProbability = $this->sanitizeInt($this->dbConfig['prune_probability'] ?? 3, 0, 100, 3);
         $this->dbPruneBatchSize = $this->sanitizeInt($this->dbConfig['prune_batch_size'] ?? 4000, 100, 200000, 4000);
         $this->dbRetentionDays = $this->sanitizeInt($this->dbConfig['retention_days'] ?? 365, 7, 3650, 365);
+
+        $this->primaryAdapter = $this->driver === 'db'
+            ? new UsageLoggerDbAdapter(
+                function (array $record): void {
+                    $this->appendDbRecord($record);
+                },
+                fn (int $limit): array => $this->readLatestDb($limit),
+                fn (): array => $this->summarizeAllDb()
+            )
+            : new UsageLoggerFileAdapter(
+                function (array $record): void {
+                    $this->appendFileRecord($record);
+                },
+                fn (int $limit): array => $this->readLatestFile($limit),
+                fn (): array => $this->summarizeAllFile()
+            );
+
+        if ($this->driver === 'db' && $this->fileFallbackRead) {
+            $this->fallbackAdapter = new UsageLoggerFileAdapter(
+                function (array $record): void {
+                    $this->appendFileRecord($record);
+                },
+                fn (int $limit): array => $this->readLatestFile($limit),
+                fn (): array => $this->summarizeAllFile()
+            );
+        }
     }
 
     public function isEnabled(): bool
@@ -85,20 +115,17 @@ final class UsageLogger
         }
 
         $record = $this->buildRecord($context);
-
-        if ($this->driver === 'db') {
-            try {
-                $this->appendDbRecord($record);
+        try {
+            $this->primaryAdapter->append($record);
+            return;
+        } catch (Throwable $error) {
+            if ($this->driver !== 'db' || !$this->fileFallbackRead || !($this->fallbackAdapter instanceof UsageLoggerAdapter)) {
                 return;
-            } catch (Throwable $error) {
-                if (!$this->fileFallbackRead) {
-                    return;
-                }
-                $this->recordFallbackEvent('append_db_to_file', $error);
             }
+            $this->recordFallbackEvent('append_db_to_file', $error);
         }
 
-        $this->appendFileRecord($record);
+        $this->fallbackAdapter->append($record);
     }
 
     public function readLatest(int $limit = 250): array
@@ -108,19 +135,16 @@ final class UsageLogger
         }
 
         $safeLimit = max(1, min(5000, $limit));
-
-        if ($this->driver === 'db') {
-            try {
-                return $this->readLatestDb($safeLimit);
-            } catch (Throwable $error) {
-                if (!$this->fileFallbackRead) {
-                    return [];
-                }
-                $this->recordFallbackEvent('read_db_to_file', $error);
+        try {
+            return $this->primaryAdapter->readLatest($safeLimit);
+        } catch (Throwable $error) {
+            if ($this->driver !== 'db' || !$this->fileFallbackRead || !($this->fallbackAdapter instanceof UsageLoggerAdapter)) {
+                return [];
             }
+            $this->recordFallbackEvent('read_db_to_file', $error);
         }
 
-        return $this->readLatestFile($safeLimit);
+        return $this->fallbackAdapter->readLatest($safeLimit);
     }
 
     public function summarize(array $entries): array
@@ -133,19 +157,16 @@ final class UsageLogger
         if (!$this->enabled) {
             return $this->defaultSummary();
         }
-
-        if ($this->driver === 'db') {
-            try {
-                return $this->summarizeAllDb();
-            } catch (Throwable $error) {
-                if (!$this->fileFallbackRead) {
-                    return $this->defaultSummary();
-                }
-                $this->recordFallbackEvent('summary_db_to_file', $error);
+        try {
+            return $this->primaryAdapter->summarizeAll();
+        } catch (Throwable $error) {
+            if ($this->driver !== 'db' || !$this->fileFallbackRead || !($this->fallbackAdapter instanceof UsageLoggerAdapter)) {
+                return $this->defaultSummary();
             }
+            $this->recordFallbackEvent('summary_db_to_file', $error);
         }
 
-        return $this->summarizeAllFile();
+        return $this->fallbackAdapter->summarizeAll();
     }
 
     private function buildRecord(array $context): array

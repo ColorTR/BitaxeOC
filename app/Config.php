@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 $config = [
-    'app_version' => 'v307',
+    'app_version' => 'v308',
     'frontend' => [
         // runtime: keep Tailwind runtime script (safe default)
         // static: use prebuilt CSS if available at frontend.tailwind_static_css
