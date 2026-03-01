@@ -21,6 +21,8 @@ Bu plan, davranis degisikligi yaratmadan kod tabanini bolerek daha guvenli gelis
 - Hedef:
   - `collectServerStatus`, DB metric sorgulari ve process cache akislarini `app/OpsServerStatusService.php` altina tasimak
   - `ops-panel.php` icinde sadece auth + routing + render kalmasi
+- Durum:
+  - v305: DB metric/sorgu katmani `app/OpsDbMetrics.php`'e tasindi ve panelde servis delegasyonu acildi.
 - Patch plan:
   1. Yeni servis dosyasi ekle (facade + mevcut fonksiyonlarin birebir tasinmasi)
   2. `ops-panel.php` icinde eski fonksiyon adlariyla servis delegasyonu yap

@@ -248,3 +248,4 @@
 - v302: Export kaynak notu kutu disina, upload kutusunun hemen ustune tasindi; link tekrar tiklanabilir hale getirilirken kutu ile bosluk minimuma indirildi.
 - v303: Ops panelde `ZZ/unknown` gorunen ulke-dil loglari icin kalici telemetry duzeltmesi yapildi; frontend usage payload'ina browser dil/ulke/zaman bilgisi eklendi ve backendde `country_hint` + browser-language fallback katmani devreye alindi.
 - v304: P0 refactor baslatildi; API endpointlerdeki tekrar eden runtime/context/POST+same-origin bootstrap akisi `ApiBootstrap` yardimcilarina merkezilestirildi ve P0/P1 patch+acceptance plani eklendi.
+- v305: P0-2 ilk dilim tamamlandi; ops-panel icindeki DB metrik/sorgu yardimcilari `app/OpsDbMetrics.php` servisine tasinip panel fonksiyonlari servis delegasyonuna cevrildi (davranis degismeden).
