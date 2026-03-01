@@ -15,12 +15,12 @@ require_once __DIR__ . '/../app/ApiBootstrap.php';
 require_once __DIR__ . '/../app/UsageLogger.php';
 require_once __DIR__ . '/../app/Version.php';
 
-$config = ApiBootstrap::loadConfig();
-$securityConfig = ApiBootstrap::section($config, 'security');
-$limitsConfig = ApiBootstrap::section($config, 'limits');
-$loggingConfig = ApiBootstrap::section($config, 'logging');
-
-$clientContext = ApiBootstrap::clientContext($securityConfig);
+$runtime = ApiBootstrap::loadRuntimeContext(['security', 'limits', 'logging']);
+$config = $runtime['config'];
+$securityConfig = $runtime['sections']['security'];
+$limitsConfig = $runtime['sections']['limits'];
+$loggingConfig = $runtime['sections']['logging'];
+$clientContext = $runtime['clientContext'];
 $clientIp = (string)$clientContext['clientIp'];
 $clientCountryCode = (string)$clientContext['clientCountryCode'];
 $userAgent = (string)$clientContext['userAgent'];
@@ -72,8 +72,7 @@ $inferLanguageCode = static function (string $raw): string {
 };
 
 try {
-    Security::assertPostRequest();
-    Security::assertSameOriginRequest();
+    ApiBootstrap::assertPostAndSameOrigin();
 
     $maxTotalBytes = max(1, (int)($limitsConfig['max_total_bytes'] ?? (10 * 1024 * 1024)));
     $requestOverhead = max(0, (int)($securityConfig['max_request_overhead_bytes'] ?? (1 * 1024 * 1024)));

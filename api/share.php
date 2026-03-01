@@ -15,12 +15,12 @@ require_once __DIR__ . '/../app/ApiBootstrap.php';
 require_once __DIR__ . '/../app/UsageIngest.php';
 require_once __DIR__ . '/../app/UsageLogger.php';
 
-$config = ApiBootstrap::loadConfig();
-$securityConfig = ApiBootstrap::section($config, 'security');
-$sharingConfig = ApiBootstrap::section($config, 'sharing');
-$loggingConfig = ApiBootstrap::section($config, 'logging');
-
-$clientContext = ApiBootstrap::clientContext($securityConfig);
+$runtime = ApiBootstrap::loadRuntimeContext(['security', 'sharing', 'logging']);
+$config = $runtime['config'];
+$securityConfig = $runtime['sections']['security'];
+$sharingConfig = $runtime['sections']['sharing'];
+$loggingConfig = $runtime['sections']['logging'];
+$clientContext = $runtime['clientContext'];
 $clientIp = (string)$clientContext['clientIp'];
 $clientCountryCode = (string)$clientContext['clientCountryCode'];
 $userAgent = (string)$clientContext['userAgent'];
@@ -86,7 +86,7 @@ try {
     $store = new ShareStore($sharingConfig);
 
     if ($method === 'POST') {
-        Security::assertSameOriginRequest();
+        ApiBootstrap::assertPostAndSameOrigin();
         $action = strtolower(trim((string)($_GET['action'] ?? 'create')));
 
         if ($action === 'usage-log') {

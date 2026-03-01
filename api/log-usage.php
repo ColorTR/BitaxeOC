@@ -13,11 +13,11 @@ require_once __DIR__ . '/../app/ApiBootstrap.php';
 require_once __DIR__ . '/../app/UsageIngest.php';
 require_once __DIR__ . '/../app/UsageLogger.php';
 
-$config = ApiBootstrap::loadConfig();
-$securityConfig = ApiBootstrap::section($config, 'security');
-$loggingConfig = ApiBootstrap::section($config, 'logging');
-
-$clientContext = ApiBootstrap::clientContext($securityConfig);
+$runtime = ApiBootstrap::loadRuntimeContext(['security', 'logging']);
+$config = $runtime['config'];
+$securityConfig = $runtime['sections']['security'];
+$loggingConfig = $runtime['sections']['logging'];
+$clientContext = $runtime['clientContext'];
 $clientIp = (string)$clientContext['clientIp'];
 $clientCountryCode = (string)$clientContext['clientCountryCode'];
 $userAgent = (string)$clientContext['userAgent'];
@@ -25,8 +25,7 @@ $rateLimitIdentity = (string)$clientContext['rateLimitIdentity'];
 
 try {
     ApiBootstrap::initRuntime($securityConfig, true);
-    Security::assertPostRequest();
-    Security::assertSameOriginRequest();
+    ApiBootstrap::assertPostAndSameOrigin();
 
     $logger = new UsageLogger($loggingConfig);
     if (!$logger->isEnabled()) {

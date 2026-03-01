@@ -8,6 +8,42 @@ use Throwable;
 
 final class ApiBootstrap
 {
+    /**
+     * @param list<string> $sections
+     * @return array{
+     *   config: array<string,mixed>,
+     *   sections: array<string,array<string,mixed>>,
+     *   clientContext: array{
+     *     trustProxyHeaders: bool,
+     *     clientIp: string,
+     *     clientCountryCode: string,
+     *     userAgent: string,
+     *     rateLimitIdentity: string
+     *   }
+     * }
+     */
+    public static function loadRuntimeContext(array $sections = []): array
+    {
+        $config = self::loadConfig();
+        $resolvedSections = [];
+        foreach ($sections as $sectionName) {
+            if (!is_string($sectionName) || $sectionName === '') {
+                continue;
+            }
+            $resolvedSections[$sectionName] = self::section($config, $sectionName);
+        }
+
+        if (!array_key_exists('security', $resolvedSections)) {
+            $resolvedSections['security'] = self::section($config, 'security');
+        }
+
+        return [
+            'config' => $config,
+            'sections' => $resolvedSections,
+            'clientContext' => self::clientContext($resolvedSections['security']),
+        ];
+    }
+
     public static function loadConfig(): array
     {
         $config = require __DIR__ . '/Config.php';
@@ -50,6 +86,12 @@ final class ApiBootstrap
         if ($startSession) {
             Security::startSession($securityConfig);
         }
+    }
+
+    public static function assertPostAndSameOrigin(): void
+    {
+        Security::assertPostRequest();
+        Security::assertSameOriginRequest();
     }
 
     /**
