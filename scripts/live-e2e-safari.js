@@ -242,6 +242,15 @@ async function run() {
     return String(url || '');
   }
 
+  function isDynamicShareUrl(url) {
+    const value = String(url || '').trim();
+    if (!value) return false;
+    return (
+      /[?&]share=[a-f0-9]{16,80}(?:$|[&#])/i.test(value)
+      || /\/r\/[a-f0-9]{16,80}(?:\/)?(?:$|[?#])/i.test(value)
+    );
+  }
+
   async function freshPage() {
     await navigate(TARGET_URL);
     await waitFor(
@@ -925,7 +934,7 @@ async function run() {
     `);
     assert(managerStateAfterSample.radios === 0, `Sample file should not appear in manager radios: ${short(managerStateAfterSample)}`);
     assert(managerStateAfterSample.sampleStillListed === false, `Sample file should not be listed in manager: ${short(managerStateAfterSample)}`);
-    assert(managerStateAfterSample.sampleBtnHidden === true, 'Sample button must stay hidden inside file manager overlay');
+    assert(managerStateAfterSample.sampleBtnHidden === false, 'Sample button should stay visible inside file manager overlay');
 
     await exec(`
       const csv = [
@@ -1557,7 +1566,7 @@ async function run() {
 
     await exec("document.getElementById('share-btn')?.click(); return true;");
     const firstUrl = await waitForShareUrl('first share copied', 0, 20000);
-    assert(firstUrl.includes('?share='), `First share URL invalid: ${firstUrl}`);
+    assert(isDynamicShareUrl(firstUrl), `First share URL invalid: ${firstUrl}`);
 
     await exec("document.getElementById('share-modal-copy-btn')?.click(); return true;");
     const modalState = await exec(`
@@ -1577,7 +1586,7 @@ async function run() {
 
     await exec("document.getElementById('share-btn')?.click(); return true;");
     const secondUrl = await waitForShareUrl('second share copied', 1, 20000);
-    assert(secondUrl.includes('?share='), `Second share URL invalid: ${secondUrl}`);
+    assert(isDynamicShareUrl(secondUrl), `Second share URL invalid: ${secondUrl}`);
     assert(firstUrl === secondUrl, `Same dataset should keep same share URL: ${firstUrl} != ${secondUrl}`);
     return `sameLink=true, level=${modalState.statusLevel || 'n/a'}`;
   });
@@ -1777,7 +1786,7 @@ async function run() {
     `);
     await exec("document.getElementById('share-btn')?.click(); return true;");
     const firstUrl = await waitForShareUrl('first layout share copied', 0, 20000);
-    assert(firstUrl.includes('?share='), `Invalid first share URL: ${firstUrl}`);
+    assert(isDynamicShareUrl(firstUrl), `Invalid first share URL: ${firstUrl}`);
     await exec("document.getElementById('share-modal-close-btn')?.click(); return true;");
 
     const toggled = await exec(`
@@ -1794,7 +1803,7 @@ async function run() {
 
     await exec("document.getElementById('share-btn')?.click(); return true;");
     const secondUrl = await waitForShareUrl('second layout share copied', 1, 20000);
-    assert(secondUrl.includes('?share='), `Invalid second share URL: ${secondUrl}`);
+    assert(isDynamicShareUrl(secondUrl), `Invalid second share URL: ${secondUrl}`);
     assert(firstUrl !== secondUrl, `Share URL should change when layout changes: ${firstUrl} == ${secondUrl}`);
     return `changed=true`;
   });
@@ -2054,7 +2063,7 @@ async function run() {
     const filteredRows = await waitFor('share-filter rows reduced', "const n=document.querySelectorAll('#tableBody tr').length; return n > 0 && n <= 2 ? n : 0;", 12000, 250);
     await exec("document.getElementById('share-btn')?.click(); return true;");
     const shareUrl = await waitForShareUrl('share-filter copied url', 0, 20000);
-    assert(shareUrl.includes('?share='), `Invalid share URL: ${shareUrl}`);
+    assert(isDynamicShareUrl(shareUrl), `Invalid share URL: ${shareUrl}`);
     latestDynamicShareUrl = shareUrl;
 
     await navigate(shareUrl);

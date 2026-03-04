@@ -6,6 +6,34 @@ namespace BitaxeOc\App;
 
 final class ViewBootstrap
 {
+    private static function extractRouteToken(array $server, array $query, string $basePath): string
+    {
+        $fromQuery = strtolower(trim((string)($query['r'] ?? '')));
+        if ($fromQuery !== '' && preg_match('/^[a-f0-9]{16,80}$/', $fromQuery) === 1) {
+            return $fromQuery;
+        }
+
+        $requestUri = (string)($server['REQUEST_URI'] ?? '');
+        if ($requestUri === '') return '';
+        $requestPath = (string)(parse_url($requestUri, PHP_URL_PATH) ?? '');
+        if ($requestPath === '') return '';
+
+        $normalizedBase = rtrim($basePath, '/');
+        if ($normalizedBase !== '' && str_starts_with($requestPath, $normalizedBase . '/')) {
+            $requestPath = substr($requestPath, strlen($normalizedBase));
+        } elseif ($normalizedBase !== '' && $requestPath === $normalizedBase) {
+            $requestPath = '/';
+        }
+
+        $requestPath = '/' . ltrim($requestPath, '/');
+        if (!preg_match('/^\/r\/([a-f0-9]{16,80})\/?$/i', $requestPath, $match)) {
+            return '';
+        }
+
+        $token = strtolower(trim((string)($match[1] ?? '')));
+        return (preg_match('/^[a-f0-9]{16,80}$/', $token) === 1) ? $token : '';
+    }
+
     /**
      * Build index.php runtime context from config + request metadata.
      */
@@ -35,7 +63,6 @@ final class ViewBootstrap
         if ($importToken !== '' && preg_match('/^[a-f0-9]{16,80}$/', $importToken) !== 1) {
             $importToken = '';
         }
-        $isImportView = $importToken !== '';
 
         $scriptName = str_replace('\\', '/', (string)($server['SCRIPT_NAME'] ?? '/index.php'));
         $scriptDir = rtrim(dirname($scriptName), '/');
@@ -43,6 +70,12 @@ final class ViewBootstrap
             $scriptDir = '';
         }
         $basePath = $scriptDir;
+
+        $routeToken = self::extractRouteToken($server, $query, $basePath);
+        if ($importToken === '' && $routeToken !== '') {
+            $importToken = $routeToken;
+        }
+        $isImportView = $importToken !== '';
 
         $forwardedProto = strtolower(trim((string)($server['HTTP_X_FORWARDED_PROTO'] ?? '')));
         $isHttps = (!empty($server['HTTPS']) && $server['HTTPS'] !== 'off') || $forwardedProto === 'https';

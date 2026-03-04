@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use BitaxeOc\App\ApiBootstrap;
+use BitaxeOc\App\AutotuneImportStore;
 use BitaxeOc\App\HttpException;
 use BitaxeOc\App\Security;
 use BitaxeOc\App\ShareStore;
@@ -11,6 +12,7 @@ use BitaxeOc\App\Version;
 use BitaxeOc\App\ViewBootstrap;
 
 require_once __DIR__ . '/../app/Security.php';
+require_once __DIR__ . '/../app/AutotuneImportStore.php';
 require_once __DIR__ . '/../app/ShareStore.php';
 require_once __DIR__ . '/../app/UsageLogger.php';
 require_once __DIR__ . '/../app/ApiBootstrap.php';
@@ -110,6 +112,7 @@ $run('View bootstrap canonical + robots', static function (): string {
     $cfg = ApiBootstrap::loadConfig();
     $server = [
         'SCRIPT_NAME' => '/index.php',
+        'REQUEST_URI' => '/',
         'HTTP_HOST' => 'oc.colortr.com',
         'HTTPS' => 'on',
     ];
@@ -128,7 +131,16 @@ $run('View bootstrap canonical + robots', static function (): string {
     if (($ctxImport['seoRobots'] ?? '') !== 'noindex,nofollow,noarchive') {
         throw new RuntimeException('import robots mismatch');
     }
-    return 'main/share/import robots ok';
+    $serverRoute = $server;
+    $serverRoute['REQUEST_URI'] = '/r/' . str_repeat('c', 16);
+    $ctxRoute = ViewBootstrap::forIndex($cfg, $serverRoute, []);
+    if (($ctxRoute['seoRobots'] ?? '') !== 'noindex,nofollow,noarchive') {
+        throw new RuntimeException('route robots mismatch');
+    }
+    if (($ctxRoute['importToken'] ?? '') !== str_repeat('c', 16)) {
+        throw new RuntimeException('route import token mismatch');
+    }
+    return 'main/share/import/route robots ok';
 });
 
 $run('Api bootstrap client context identity', static function (): string {
@@ -377,6 +389,93 @@ $run('ShareStore file dedupe + meta integrity', static function (): string {
     }
 
     return 'dedupe ok';
+});
+
+$run('Autotune import file mode one-time consume + filename hardening', static function (): string {
+    $tmpRel = 'tmp/unit_import_tickets_' . bin2hex(random_bytes(4));
+    $root = dirname(__DIR__);
+    $tmpAbs = $root . '/' . $tmpRel;
+
+    $cfg = [
+        'enabled' => true,
+        'driver' => 'file',
+        'file_fallback_read' => true,
+        'storage_dir' => $tmpRel,
+        'id_bytes' => 12,
+        'default_ttl_sec' => 600,
+        'max_ttl_sec' => 3600,
+        'max_csv_bytes' => 2 * 1024 * 1024,
+        'max_filename_bytes' => 180,
+        'max_source_bytes' => 48,
+        'file_prune_probability' => 0,
+    ];
+
+    $store = new AutotuneImportStore($cfg, $root);
+    try {
+        $created = $store->create([
+            'source' => 'axeos<script>alert(1)</script>',
+            'filename' => '../../<img src=x onerror=alert(1)>.csv',
+            'csv' => "voltage,frequency,hashrate,temp,vrTemp,errorRate\n1270,832,3426,58,69,0.4",
+            'timestamp' => time(),
+        ], 600, [
+            'ip' => '127.0.0.1',
+            'origin' => 'https://bitaxe.colortr.com',
+            'userAgent' => 'unit-test',
+        ]);
+
+        $importId = (string)($created['id'] ?? '');
+        if (!preg_match('/^[a-f0-9]{16,80}$/', $importId)) {
+            throw new RuntimeException('invalid import id format');
+        }
+
+        $sanitizedFilename = (string)($created['filename'] ?? '');
+        if ($sanitizedFilename === '' || str_contains($sanitizedFilename, '<') || str_contains($sanitizedFilename, '>')) {
+            throw new RuntimeException('filename hardening failed');
+        }
+
+        $first = $store->consume($importId, [
+            'ip' => '127.0.0.1',
+            'origin' => 'https://oc.colortr.com',
+            'userAgent' => 'unit-test-consume',
+        ]);
+        if (($first['state'] ?? '') !== 'ok') {
+            throw new RuntimeException('first consume should be ok');
+        }
+        $firstCsv = (string)($first['record']['csv'] ?? '');
+        if ($firstCsv === '' || !str_contains($firstCsv, 'voltage,frequency,hashrate')) {
+            throw new RuntimeException('first consume csv missing');
+        }
+
+        $second = $store->consume($importId, [
+            'ip' => '127.0.0.1',
+            'origin' => 'https://oc.colortr.com',
+            'userAgent' => 'unit-test-consume-2',
+        ]);
+        if (($second['state'] ?? '') !== 'consumed') {
+            throw new RuntimeException('second consume should be consumed');
+        }
+        if ((string)($second['record']['csv'] ?? '') !== '') {
+            throw new RuntimeException('second consume must not expose csv');
+        }
+    } finally {
+        if (is_dir($tmpAbs)) {
+            $it = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($tmpAbs, FilesystemIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($it as $entry) {
+                /** @var SplFileInfo $entry */
+                if ($entry->isDir()) {
+                    @rmdir($entry->getPathname());
+                } else {
+                    @unlink($entry->getPathname());
+                }
+            }
+            @rmdir($tmpAbs);
+        }
+    }
+
+    return 'one-time + sanitize ok';
 });
 
 $run('ShareStore DB mode file fallback create/read/meta/dedupe', static function (): string {

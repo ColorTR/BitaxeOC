@@ -8,6 +8,7 @@ RewriteEngine On
 RewriteRule ^api/autotune/import/?$ api/autotune/import.php [L,QSA,NC]
 RewriteRule ^api/autotune/consume/?$ api/autotune/consume.php [L,QSA,NC]
 RewriteRule ^import/([a-f0-9]{16,80})/?$ index.php?import=$1 [L,QSA,NC]
+RewriteRule ^r/([a-f0-9]{16,80})/?$ index.php?i=$1 [L,QSA,NC]
 RewriteRule ^(app|storage|tmp)(/|$) - [F,L,NC]
 RewriteRule (^|/)\.(?!well-known/) - [F,L]
 RewriteRule ^(composer\.(json|lock)|package(-lock)?\.json|README\.md|DEPLOYMENT\.md|DEPLOYMENT_TR\.md|AGENTS\.md)$ - [F,L,NC]

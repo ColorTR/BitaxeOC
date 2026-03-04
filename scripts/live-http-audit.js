@@ -934,7 +934,33 @@ async function run() {
     return `id=${importId.slice(0, 12)}... first=${consume.res.status} second=${second.res.status}`;
   });
 
-  await runTest('Import route: frontend API paths stay absolute under /import/<id>', async () => {
+  await runTest('API security: autotune import sanitizes risky filename chars', async () => {
+    const create = await getJson(`${baseOrigin}/api/autotune/import.php`, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'https://bitaxe.colortr.com',
+        'X-Requested-With': 'XMLHttpRequest',
+        'User-Agent': apiUserAgent('autotune-filename-sanitize')
+      },
+      body: JSON.stringify({
+        type: 'autotune_csv_import',
+        source: 'axeos',
+        filename: '../../<img src=x onerror=alert(1)>.csv',
+        csv: 'voltage,frequency,hashrate\n1270,832,3426',
+        timestamp: Math.floor(Date.now() / 1000)
+      })
+    });
+
+    assert(create.res.status === 201, `Expected 201, got ${create.res.status}`);
+    const filename = String(create.data?.import?.filename || '');
+    assert(filename.length > 0, 'Missing sanitized filename');
+    assert(!filename.includes('<') && !filename.includes('>'), `Filename still contains angle brackets: ${filename}`);
+    return filename;
+  });
+
+  await runTest('Import route: frontend API paths stay absolute under /r/<id>', async () => {
     const csvBody = [
       'voltage,frequency,hashrate,temp,vrTemp,errorRate,efficiency,power',
       '1270,832,3426,60,70,0.46,16.11,55.2'
@@ -960,7 +986,7 @@ async function run() {
 
     assert(create.res.status === 201, `Expected 201, got ${create.res.status}`);
     const importPath = String(create.data?.import?.importPath || '').trim();
-    assert(importPath.startsWith('/import/'), `Invalid importPath: ${importPath}`);
+    assert(importPath.startsWith('/r/'), `Invalid importPath: ${importPath}`);
 
     const importPage = await fetchWithTiming(`${baseOrigin}${importPath}`, {
       method: 'GET',
@@ -978,6 +1004,14 @@ async function run() {
       'SHARE_GET_API_PATH is not absolute'
     );
     return importPath;
+  });
+
+  await runTest('Frontend share URL builder uses short /r/<token> format', async () => {
+    assert(
+      indexHtml.includes("const routePath = pathWithBase(`/r/${normalizedToken}`);"),
+      'Share URL builder is not using /r/<token> route'
+    );
+    return 'share-route-builder=/r/<token>';
   });
 
   await runTest('Frontend assets: local tailwind asset is referenced', async () => {

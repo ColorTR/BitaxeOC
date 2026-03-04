@@ -606,6 +606,7 @@ $jsonJsFlags = JSON_HEX_TAG
         let resizeRafId = 0;
         let isShareBusy = false;
         let isReadOnlyShareView = false;
+        let keepUploadOverlayClosedOnBoot = false;
         let mobileHeaderMenuOpen = false;
         let eliteRadarTooltipEl = null;
         let lastUploadAttemptStats = null;
@@ -637,6 +638,7 @@ $jsonJsFlags = JSON_HEX_TAG
         const SHARE_FETCH_TIMEOUT_MS = 15000;
         const SHARE_TOKEN_PATTERN = /^[a-f0-9]{16,80}$/;
         const IMPORT_TOKEN_PATTERN = /^[a-f0-9]{16,80}$/;
+        const IMPORT_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
         const SHARE_STATIC_TEST_TOKEN = 'test';
         const IMPORT_TOKEN_FROM_SERVER = <?= json_encode($importToken, $jsonJsFlags) ?>;
         const SHARE_LAYOUT_ALLOWED_PANELS = ['stability', 'elite', 'aate', 'power', 'efficiency', 'temperature', 'frequency', 'vf-heatmap', 'table'];
@@ -1445,6 +1447,11 @@ $jsonJsFlags = JSON_HEX_TAG
             }
 
             const pathname = String(window.location.pathname || '');
+            const routeMatch = pathname.match(/\/r\/([a-f0-9]{16,80})\/?$/i);
+            if (routeMatch) {
+                const routeToken = String(routeMatch[1] || '').trim().toLowerCase();
+                if (IMPORT_TOKEN_PATTERN.test(routeToken)) return routeToken;
+            }
             const pathMatch = pathname.match(/\/import\/([a-f0-9]{16,80})\/?$/i);
             if (!pathMatch) return '';
             const token = String(pathMatch[1] || '').trim().toLowerCase();
@@ -1478,6 +1485,100 @@ $jsonJsFlags = JSON_HEX_TAG
             } catch (_) {
                 // no-op
             }
+        }
+
+        function buildShortShareUrl(token) {
+            const normalizedToken = String(token || '').trim().toLowerCase();
+            if (!normalizedToken) return '';
+            if (normalizedToken === SHARE_STATIC_TEST_TOKEN) {
+                const staticUrl = new URL(pathWithBase('/i'), window.location.origin);
+                staticUrl.searchParams.set('share', SHARE_STATIC_TEST_TOKEN);
+                staticUrl.searchParams.delete('s');
+                staticUrl.hash = '';
+                return staticUrl.toString();
+            }
+            const routePath = pathWithBase(`/r/${normalizedToken}`);
+            const url = new URL(routePath, window.location.origin);
+            url.hash = '';
+            return url.toString();
+        }
+
+        function getImportSessionCacheKey(token) {
+            return `bitaxe_import_cache_${String(token || '').trim().toLowerCase()}`;
+        }
+
+        function readImportPayloadFromSessionCache(token) {
+            try {
+                const key = getImportSessionCacheKey(token);
+                const raw = window.sessionStorage.getItem(key);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') return null;
+                const csv = String(parsed.csv || '');
+                const filename = String(parsed.filename || 'autotune_report.csv').trim() || 'autotune_report.csv';
+                const savedAt = Number(parsed.savedAt || 0);
+                if (!csv) return null;
+                if (Number.isFinite(savedAt) && savedAt > 0) {
+                    const age = Date.now() - savedAt;
+                    if (age > IMPORT_CACHE_TTL_MS) {
+                        window.sessionStorage.removeItem(key);
+                        return null;
+                    }
+                }
+                return { csv, filename, savedAt };
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function writeImportPayloadToSessionCache(token, importedPayload) {
+            try {
+                if (!IMPORT_TOKEN_PATTERN.test(String(token || '').trim().toLowerCase())) return;
+                const csv = String(importedPayload?.csv || '');
+                if (!csv) return;
+                const filename = String(importedPayload?.filename || 'autotune_report.csv').trim() || 'autotune_report.csv';
+                const key = getImportSessionCacheKey(token);
+                window.sessionStorage.setItem(key, JSON.stringify({
+                    csv,
+                    filename,
+                    savedAt: Date.now()
+                }));
+            } catch (_) {
+                // no-op
+            }
+        }
+
+        function applyImportedCsvPayload(token, importedPayload) {
+            const csvText = String(importedPayload?.csv || '');
+            const parsed = parseCSV(csvText);
+            if (!Array.isArray(parsed.data) || parsed.data.length === 0) {
+                return false;
+            }
+
+            const importedFilename = String(importedPayload?.filename || 'autotune_report.csv').trim() || 'autotune_report.csv';
+            const importedRecord = buildFileRecordFromUpload({
+                name: importedFilename,
+                lastModified: Date.now()
+            }, parsed);
+            importedRecord.id = `autotune_import_${String(token || '').trim().toLowerCase()}`;
+            importedRecord.isMaster = true;
+            importedRecord.enabled = true;
+
+            rawFilesData = [importedRecord];
+            consolidatedData = [];
+            visibleRows = DEFAULT_VISIBLE_ROWS;
+            pendingFileReads = 0;
+            appendUploadMode = false;
+            keepUploadOverlayClosedOnBoot = false;
+            dataQualityPinnedByUser = false;
+            if (refs.fileInput) refs.fileInput.value = '';
+
+            applyFilterState({});
+            recomputeAndRender(true);
+            setShareReadOnlyMode(false);
+            activateDashboardView({ allowUpload: true });
+            syncControlVisibility();
+            return true;
         }
 
         function buildSharePayload() {
@@ -1541,11 +1642,7 @@ $jsonJsFlags = JSON_HEX_TAG
             }
 
             if (sampleOnly) {
-                const shareUrl = new URL(window.location.href);
-                shareUrl.searchParams.set('share', SHARE_STATIC_TEST_TOKEN);
-                shareUrl.searchParams.delete('s');
-                shareUrl.hash = '';
-                const shareUrlText = shareUrl.toString();
+                const shareUrlText = buildShortShareUrl(SHARE_STATIC_TEST_TOKEN);
                 const copied = await copyTextToClipboard(shareUrlText);
                 openShareModal(shareUrlText, copied);
                 return;
@@ -1589,12 +1686,7 @@ $jsonJsFlags = JSON_HEX_TAG
                     throw new Error('invalid_share_token');
                 }
 
-                const shareUrl = new URL(window.location.href);
-                shareUrl.searchParams.set('share', token);
-                shareUrl.searchParams.delete('s');
-                shareUrl.hash = '';
-
-                const shareUrlText = shareUrl.toString();
+                const shareUrlText = buildShortShareUrl(token);
                 const copied = await copyTextToClipboard(shareUrlText);
                 openShareModal(shareUrlText, copied);
             } catch (error) {
@@ -1704,6 +1796,7 @@ $jsonJsFlags = JSON_HEX_TAG
         async function loadAutotuneImportFromUrl(tokenCandidate = '') {
             const token = String(tokenCandidate || getImportTokenFromUrl()).trim().toLowerCase();
             if (!token || !IMPORT_TOKEN_PATTERN.test(token)) return false;
+            const cachedPayload = readImportPayloadFromSessionCache(token);
 
             try {
                 const { response, payload } = await fetchJsonWithTimeout(
@@ -1716,11 +1809,19 @@ $jsonJsFlags = JSON_HEX_TAG
                 );
 
                 if (response.status === 404) {
+                    if (cachedPayload && applyImportedCsvPayload(token, cachedPayload)) {
+                        showInAppToast(t('alert.importLoaded'), 'success', 4200);
+                        return true;
+                    }
                     showInAppToast(t('alert.importNotFound'), 'error', 7000);
                     return false;
                 }
                 if (response.status === 410) {
                     const state = String(payload?.state || '').toLowerCase();
+                    if (state === 'consumed' && cachedPayload && applyImportedCsvPayload(token, cachedPayload)) {
+                        showInAppToast(t('alert.importLoaded'), 'success', 4200);
+                        return true;
+                    }
                     if (state === 'consumed') {
                         showInAppToast(t('alert.importConsumed'), 'warn', 7000);
                     } else {
@@ -1732,36 +1833,11 @@ $jsonJsFlags = JSON_HEX_TAG
                     throw new Error(String(payload?.error || 'import_load_failed'));
                 }
 
-                const importedPayload = payload.import;
-                const csvText = String(importedPayload.csv || '');
-                const parsed = parseCSV(csvText);
-                if (!Array.isArray(parsed.data) || parsed.data.length === 0) {
+                const importedPayload = payload.import || {};
+                if (!applyImportedCsvPayload(token, importedPayload)) {
                     throw new Error('import_payload_invalid');
                 }
-
-                const importedFilename = String(importedPayload.filename || 'autotune_report.csv').trim() || 'autotune_report.csv';
-                const importedRecord = buildFileRecordFromUpload({
-                    name: importedFilename,
-                    lastModified: Date.now()
-                }, parsed);
-                importedRecord.id = `autotune_import_${token}`;
-                importedRecord.isMaster = true;
-                importedRecord.enabled = true;
-
-                rawFilesData = [importedRecord];
-                consolidatedData = [];
-                visibleRows = DEFAULT_VISIBLE_ROWS;
-                pendingFileReads = 0;
-                appendUploadMode = false;
-                dataQualityPinnedByUser = false;
-                if (refs.fileInput) refs.fileInput.value = '';
-
-                applyFilterState({});
-                recomputeAndRender(true);
-                setShareReadOnlyMode(false);
-                activateDashboardView({ allowUpload: true });
-                syncControlVisibility();
-                clearImportTokenFromUrl();
+                writeImportPayloadToSessionCache(token, importedPayload);
                 showInAppToast(t('alert.importLoaded'), 'success', 4200);
                 return true;
             } catch (error) {
@@ -5742,12 +5818,13 @@ $jsonJsFlags = JSON_HEX_TAG
             const hasSampleOnlyData = hasData && isSampleOnlyProject();
             const uploadLocked = IS_SNAPSHOT_VIEW || isReadOnlyShareView;
             const canShare = hasData && !IS_EMBEDDED_STATE && !isReadOnlyShareView && (hasUserFiles || hasSampleOnlyData);
+            const canOpenUploadManager = !uploadLocked && (hasFiles || keepUploadOverlayClosedOnBoot);
             // Keep sample preview action reachable whenever upload overlay is open.
             // Users may want to compare their current dataset against sample data.
             const showSamplePreview = isUploadOverlayVisible() && !uploadLocked;
             setSamplePreviewVisibility(showSamplePreview);
             updateUploadProcessLabel();
-            setHidden(refs.showUploadBtn, !hasFiles || uploadLocked);
+            setHidden(refs.showUploadBtn, !canOpenUploadManager);
             setHidden(refs.shareBtn, !canShare);
             setHidden(refs.exportHtmlBtn, IS_EMBEDDED_STATE || !hasData || isReadOnlyShareView);
             setHidden(refs.exportJpegBtn, IS_EMBEDDED_STATE || !hasData || isReadOnlyShareView);
@@ -5796,6 +5873,7 @@ $jsonJsFlags = JSON_HEX_TAG
         }
 
         function showInitialUploadView() {
+            keepUploadOverlayClosedOnBoot = false;
             if ((IS_SNAPSHOT_VIEW || isReadOnlyShareView) && consolidatedData.length > 0) {
                 activateDashboardView({ allowUpload: false });
                 return;
@@ -5822,8 +5900,9 @@ $jsonJsFlags = JSON_HEX_TAG
             }, 10);
             refs.dashboardContent.classList.remove('opacity-100', 'blur-0');
             refs.dashboardContent.classList.add('opacity-30', 'blur-sm');
-            setSamplePreviewVisibility(false);
+            setSamplePreviewVisibility(!IS_SNAPSHOT_VIEW && !isReadOnlyShareView);
             if (refs.closeUploadBtn) refs.closeUploadBtn.classList.toggle('hidden', consolidatedData.length === 0);
+            syncControlVisibility();
         }
 
         async function loadSampleCsvPreview() {
@@ -5856,6 +5935,7 @@ $jsonJsFlags = JSON_HEX_TAG
                 visibleRows = DEFAULT_VISIBLE_ROWS;
                 pendingFileReads = 0;
                 appendUploadMode = false;
+                keepUploadOverlayClosedOnBoot = false;
                 dataQualityPinnedByUser = false;
                 if (refs.fileInput) refs.fileInput.value = '';
 
@@ -5998,6 +6078,7 @@ $jsonJsFlags = JSON_HEX_TAG
                 consolidatedData = [];
                 visibleRows = DEFAULT_VISIBLE_ROWS;
             }
+            keepUploadOverlayClosedOnBoot = false;
             if (refs.dataQualitySection && panelVisibility['data-quality'] !== false) {
                 refs.dataQualitySection.classList.remove('hidden');
             }
@@ -7078,7 +7159,8 @@ $jsonJsFlags = JSON_HEX_TAG
                     refs.dashboardContent.classList.remove('opacity-30', 'blur-sm');
                     refs.dashboardContent.classList.add('opacity-100', 'blur-0');
                 }
-                setSamplePreviewVisibility(false);
+                const hideSamplePreviewDuringPrefetch = Boolean(requestedShareToken) && !requestedImportToken;
+                setSamplePreviewVisibility(!hideSamplePreviewDuringPrefetch);
                 if (refs.closeUploadBtn) refs.closeUploadBtn.classList.add('hidden');
             }
 
@@ -7093,8 +7175,15 @@ $jsonJsFlags = JSON_HEX_TAG
 
             const importedLoaded = await loadAutotuneImportFromUrl(requestedImportToken);
             if (importedLoaded) return;
-            const sharedLoaded = await loadSharedReportFromUrl(requestedShareToken);
+            const shareLoadCandidate = requestedShareToken || requestedImportToken;
+            const sharedLoaded = await loadSharedReportFromUrl(shareLoadCandidate);
             if (sharedLoaded) return;
+            if (requestedImportToken && !requestedShareToken) {
+                keepUploadOverlayClosedOnBoot = true;
+                setShareReadOnlyMode(false);
+                activateDashboardView({ allowUpload: true });
+                return;
+            }
             if (requestedImportToken) setShareReadOnlyMode(false);
             if (requestedShareToken) setShareReadOnlyMode(false);
             showInitialUploadView();

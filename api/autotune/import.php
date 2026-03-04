@@ -253,7 +253,7 @@ try {
 
     $appOrigin = autotuneCurrentOrigin();
     $basePath = autotuneBasePathFromScript();
-    $importPath = ($basePath === '' ? '' : $basePath) . '/import/' . rawurlencode($created['id']);
+    $importPath = ($basePath === '' ? '' : $basePath) . '/r/' . rawurlencode($created['id']);
     $consumePath = ($basePath === '' ? '' : $basePath) . '/api/autotune/consume.php?id=' . rawurlencode($created['id']);
     $importUrl = $appOrigin . $importPath;
     $consumeUrl = $appOrigin . $consumePath;

@@ -660,6 +660,10 @@ final class AutotuneImportStore
             $name = basename($name);
         }
         $name = preg_replace('/[\x00-\x1F\x7F]/', '', $name) ?? '';
+        // Defense-in-depth: keep filenames plain and inert for downstream consumers.
+        // UI escapes values, but API payloads may be reused by other clients.
+        $name = preg_replace('/[^a-zA-Z0-9._ -]/', '_', $name) ?? '';
+        $name = trim(preg_replace('/[_ ]{2,}/', ' ', $name) ?? $name);
         if ($name === '') {
             $name = 'autotune_report.csv';
         }
@@ -881,4 +885,3 @@ final class AutotuneImportStore
         error_log('[bitaxe-oc] autotune-import ' . $context . ': ' . $error->getMessage());
     }
 }
-
