@@ -148,7 +148,7 @@ $run('Api bootstrap client context identity', static function (): string {
     try {
         $_SERVER['REMOTE_ADDR'] = '10.0.0.55'; // trusted proxy
         $_SERVER['HTTP_USER_AGENT'] = 'UnitTestAgent/1.0';
-        $_SERVER['HTTP_CF_CONNECTING_IP'] = '89.252.183.194';
+        $_SERVER['HTTP_CF_CONNECTING_IP'] = '203.0.113.194';
         $_SERVER['HTTP_CF_IPCOUNTRY'] = 'RO';
         $ctx = ApiBootstrap::clientContext([
             'trust_proxy_headers' => true,
@@ -158,13 +158,13 @@ $run('Api bootstrap client context identity', static function (): string {
     } finally {
         $_SERVER = $backup;
     }
-    if (($ctx['clientIp'] ?? '') !== '89.252.183.194') {
+    if (($ctx['clientIp'] ?? '') !== '203.0.113.194') {
         throw new RuntimeException('clientIp mismatch');
     }
     if (($ctx['clientCountryCode'] ?? '') !== 'RO') {
         throw new RuntimeException('country mismatch');
     }
-    if (!str_contains((string)($ctx['rateLimitIdentity'] ?? ''), '89.252.183.194|')) {
+    if (!str_contains((string)($ctx['rateLimitIdentity'] ?? ''), '203.0.113.194|')) {
         throw new RuntimeException('identity format mismatch');
     }
     return (string)$ctx['rateLimitIdentity'];

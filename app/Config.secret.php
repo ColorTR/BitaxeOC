@@ -89,7 +89,8 @@ return [
         'global_login_rate_limit_window_sec' => 300,
     ],
     'server' => [
-        'public_ip' => getenv('BITAXE_PUBLIC_IP') ?: '138.124.93.59',
+        // Keep repo-safe default; set actual value via BITAXE_PUBLIC_IP in environment.
+        'public_ip' => getenv('BITAXE_PUBLIC_IP') ?: '203.0.113.10',
     ],
     'security' => [
         'trust_proxy_headers' => true,

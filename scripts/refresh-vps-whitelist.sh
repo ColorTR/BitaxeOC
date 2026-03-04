@@ -6,10 +6,10 @@ set -Eeuo pipefail
 # - Keeps home IP dynamic (single current value, not append)
 # - Updates fail2ban + ufw atomically on server
 
-VPS_HOST="${BITAXE_VPS_HOST:-138.124.93.59}"
+VPS_HOST="${BITAXE_VPS_HOST:-203.0.113.10}"
 VPS_USER="${BITAXE_VPS_USER:-root}"
 VPS_PASS="${BITAXE_VPS_PASS:-}"
-OFFICE_IP="${BITAXE_OFFICE_IP:-93.114.167.23}"
+OFFICE_IP="${BITAXE_OFFICE_IP:-198.51.100.23}"
 HOME_IP="${BITAXE_HOME_IP:-}"
 
 if [[ -z "${VPS_PASS}" ]]; then

@@ -126,18 +126,18 @@ BITAXE_VPS_PASS='VPS_ROOT_SIFRE' ./scripts/refresh-vps-whitelist.sh
 ```
 
 Varsayilanlar:
-- Ofis sabit IP: `93.114.167.23`
+- Ofis sabit IP: `198.51.100.23` (example)
 - Ev IP: komut calisirken otomatik tespit edilir (degisirse eskisi overwrite edilir, birikmez)
-- VPS: `root@138.124.93.59`
+- VPS: `root@203.0.113.10` (example)
 - Ev IP degismemisse script `skip` edip hicbir degisiklik yapmaz
 
 Opsiyonel override:
 
 ```bash
 BITAXE_VPS_PASS='***' \
-BITAXE_VPS_HOST='138.124.93.59' \
+BITAXE_VPS_HOST='203.0.113.10' \
 BITAXE_VPS_USER='root' \
-BITAXE_OFFICE_IP='93.114.167.23' \
+BITAXE_OFFICE_IP='198.51.100.23' \
 BITAXE_HOME_IP='x.x.x.x' \
 ./scripts/refresh-vps-whitelist.sh
 ```
