@@ -100,7 +100,10 @@ A change is done only if:
   - create/update version tag (`vNNN`)
   - publish private GitHub Release for that tag
   - attach master backup zip asset (`bitaxe-oc_master_backend_vNNN.zip`)
-4. Do not touch other repositories/projects unless explicitly requested.
+4. GitHub release title/body language policy:
+  - always write release notes in English
+  - keep wording concise, technical, and production-focused
+5. Do not touch other repositories/projects unless explicitly requested.
 
 ## 10) App Incident Rollback Checklist
 

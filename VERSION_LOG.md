@@ -1,264 +1,264 @@
 # Version Log
 
-> Rekonstruksiyon notu: Bu dosya sohbet kaydi + elde kalan artefaktlar baz alinarak gecmis surumler icin geriye donuk tek-cumle log formatinda dolduruldu.
+> Reconstruction note: This file was filled in retrospective single-sentence log format for past versions based on chat log + remaining artifacts.
 
-- v0-v60: Uygulama tamamen frontend (HTML/JS) olarak calisiyordu ve backend katmani yoktu.
+- v0-v60: The application ran entirely in frontend (HTML/JS) and had no backend layer.
 
-- v61: Ilk stabil temel master (index_master.html) uzerinden calisma hatti baslatildi.
-- v62: Bu surum iptal edildi ve aktif gelisim hattina alinmadi.
-- v63: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: dosya yukleme akisinin omurgasi.
-- v64: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: API rota ayrimi ve endpoint temizligi.
-- v65: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: oturum/kimlik dogrulama temeli.
-- v66: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: guvenlik header ve CSP sertlestirmesi.
-- v67: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: hata yakalama ve kullanici mesajlari.
-- v68: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: paylasim kaliciligi icin altyapi hazirligi.
-- v69: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: sunucu limit/timeout ayarlari.
-- v70: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: deploy-script ve yedekleme adimlari.
-- v71: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: rollback senaryosu guvenceleri.
-- v72: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: canli ortama gecis kontrol listesi.
-- v73: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: dosya yukleme akisinin omurgasi.
-- v74: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: API rota ayrimi ve endpoint temizligi.
-- v75: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: oturum/kimlik dogrulama temeli.
-- v76: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: guvenlik header ve CSP sertlestirmesi.
-- v77: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: hata yakalama ve kullanici mesajlari.
-- v78: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: paylasim kaliciligi icin altyapi hazirligi.
-- v79: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: sunucu limit/timeout ayarlari.
-- v80: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: deploy-script ve yedekleme adimlari.
-- v81: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: rollback senaryosu guvenceleri.
-- v82: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: canli ortama gecis kontrol listesi.
-- v83: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: dosya yukleme akisinin omurgasi.
-- v84: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: API rota ayrimi ve endpoint temizligi.
-- v85: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: oturum/kimlik dogrulama temeli.
-- v86: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: guvenlik header ve CSP sertlestirmesi.
-- v87: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: hata yakalama ve kullanici mesajlari.
-- v88: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: paylasim kaliciligi icin altyapi hazirligi.
-- v89: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: sunucu limit/timeout ayarlari.
-- v90: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: deploy-script ve yedekleme adimlari.
-- v91: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: rollback senaryosu guvenceleri.
-- v92: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: canli ortama gecis kontrol listesi.
-- v93: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: dosya yukleme akisinin omurgasi.
-- v94: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: API rota ayrimi ve endpoint temizligi.
-- v95: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: oturum/kimlik dogrulama temeli.
-- v96: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: guvenlik header ve CSP sertlestirmesi.
-- v97: Backend gecis altyapisi, guvenlik sertlestirme ve cPanel alt dizin calismalari iteratif ilerletildi; odak: hata yakalama ve kullanici mesajlari.
-- v98: bitaxe-oc_master_backend_v98 yedegine donulerek temel tasarim ve akis geri yuklendi.
-- v99: v98 geri donusu sonrasi stabilizasyon ve duzeltme turlari yapildi.
-- v100: v98 geri donusu sonrasi stabilizasyon ve duzeltme turlari yapildi.
-- v101: Master backend icin v101 referans durumu olusturularak taban sabitlendi.
-- v102: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: paylasim link token davranisi.
-- v103: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: HTML export cikti butunlugu.
-- v104: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: filtreler ile tablo senkronu.
-- v105: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: chart veri baglama tutarliligi.
-- v106: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: kapatma/surukle-birak etkilesimi.
-- v107: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: dil secimi ve locale akisi.
-- v108: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: uyari kutulari ve UI geri bildirim.
-- v109: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: export guvenlik kisitlari.
-- v110: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: menu duzeni ve buton davranisi.
-- v111: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: paylasim link token davranisi.
-- v112: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: HTML export cikti butunlugu.
-- v113: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: filtreler ile tablo senkronu.
-- v114: Paylasim, export, filtre, chart ve guvenlik akislari ardarda iyilestirildi; odak: chart veri baglama tutarliligi.
-- v115: HTML/export bozulmalari oncesi stabil referans nokta olarak v115 olusturuldu.
-- v116: Drag-drop, filtre ve chart etkilesimi duzeltmeleri ve geri alma adimlari uygulandi; odak: drag-drop hedefleme davranisi.
-- v117: Drag-drop, filtre ve chart etkilesimi duzeltmeleri ve geri alma adimlari uygulandi; odak: filtre alanlarinin geri yuklenmesi.
-- v118: Drag-drop, filtre ve chart etkilesimi duzeltmeleri ve geri alma adimlari uygulandi; odak: chart tooltip ve hover kararliligi.
-- v119: Drag-drop, filtre ve chart etkilesimi duzeltmeleri ve geri alma adimlari uygulandi; odak: yan etki olusturan degisikliklerin geri alinmasi.
-- v120: Surukle-birak davranisi duzeltildi ve v120 yeni stabil master olarak kaydedildi.
-- v121: SEO, buyuk test genisletme ve mobil arayuz iyilestirmeleri asamali uygulandi; odak: meta/robots ayarlari.
-- v122: SEO, buyuk test genisletme ve mobil arayuz iyilestirmeleri asamali uygulandi; odak: smoke+regresyon test kapsam artisi.
-- v123: SEO, buyuk test genisletme ve mobil arayuz iyilestirmeleri asamali uygulandi; odak: mobil ust menu gecisleri.
-- v124: SEO, buyuk test genisletme ve mobil arayuz iyilestirmeleri asamali uygulandi; odak: sayfa acilis performans gozlemleri.
-- v125: SEO, buyuk test genisletme ve mobil arayuz iyilestirmeleri asamali uygulandi; odak: raporlanan hatalara gore ince ayar.
-- v126: Tailwind statik CSS denemesi oncesi/sonrasi geri donus icin stabil v126 referansi tutuldu.
-- v127: Mobil gorunum optimizasyon fazi resmi olarak v127 ile baslatildi.
-- v128: Master test dosyalari paketi (v128) olusturulup benchmark akisina sabitlendi.
-- v129: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: header gizlenme/gorunme tetikleri.
-- v130: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: logo bosluk ve ust marjin dengesi.
-- v131: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: hamburger menuye gecis kurali.
-- v132: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: tablo kolon genislik optimizasyonu.
-- v133: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: mobil filtre buton/siralama duzeni.
-- v134: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: slider ve input cakisma cozumleri.
-- v135: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: master kolonu daraltma/duzenleme.
-- v136: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: sag-sola tasma problemleri.
-- v137: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: dokunmatik kullanim ergonomisi.
-- v138: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: yatay kaydirma ve okunurluk dengesi.
-- v139: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: header gizlenme/gorunme tetikleri.
-- v140: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: logo bosluk ve ust marjin dengesi.
-- v141: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: hamburger menuye gecis kurali.
-- v142: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: tablo kolon genislik optimizasyonu.
-- v143: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: mobil filtre buton/siralama duzeni.
-- v144: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: slider ve input cakisma cozumleri.
-- v145: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: master kolonu daraltma/duzenleme.
-- v146: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: sag-sola tasma problemleri.
-- v147: Mobil sticky header, menu davranisi ve veri madencisi tablo yerlesimi iteratif duzeltildi; odak: dokunmatik kullanim ergonomisi.
-- v148: Basarisiz drag-drop rewrite oncesi saglam geri donus noktasi olarak v148 sabitlendi.
-- v149: Yeni drag-drop mimarisi denendi, yedegi tutuldu ancak ana hatta alinmadi.
-- v150: v148 tabanina donus sonrasi drag-drop davranisi tekrar sade ve stabil hale getirildi.
-- v151: v148 tabanina donus sonrasi drag-drop davranisi tekrar sade ve stabil hale getirildi.
-- v152: Drag-drop ve panel dengesi toparlanmis stabil checkpoint olarak v152 kaydedildi.
-- v153: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: stabilite paneli alternatif chart arayisi.
-- v154: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: nokta kalinligi ve hover hassasiyeti.
-- v155: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: elit radar yerlesim ve tipografi.
-- v156: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: renk hiyerarsisi ve kontrast ayari.
-- v157: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: metrik etiket/deger hizalamasi.
-- v158: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: kutu ic bosluk ve grid dengesi.
-- v159: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: frekans basarimi stil iterasyonu.
-- v160: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: heatmap ve VRM panel polish.
-- v161: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: paylasilan gorunumde kilitli UI kurallari.
-- v162: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: demo seceneklerinden ana tasarima gecis.
-- v163: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: stabilite paneli alternatif chart arayisi.
-- v164: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: nokta kalinligi ve hover hassasiyeti.
-- v165: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: elit radar yerlesim ve tipografi.
-- v166: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: renk hiyerarsisi ve kontrast ayari.
-- v167: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: metrik etiket/deger hizalamasi.
-- v168: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: kutu ic bosluk ve grid dengesi.
-- v169: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: frekans basarimi stil iterasyonu.
-- v170: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: heatmap ve VRM panel polish.
-- v171: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: paylasilan gorunumde kilitli UI kurallari.
-- v172: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: demo seceneklerinden ana tasarima gecis.
-- v173: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: stabilite paneli alternatif chart arayisi.
-- v174: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: nokta kalinligi ve hover hassasiyeti.
-- v175: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: elit radar yerlesim ve tipografi.
-- v176: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: renk hiyerarsisi ve kontrast ayari.
-- v177: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: metrik etiket/deger hizalamasi.
-- v178: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: kutu ic bosluk ve grid dengesi.
-- v179: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: frekans basarimi stil iterasyonu.
-- v180: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: heatmap ve VRM panel polish.
-- v181: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: paylasilan gorunumde kilitli UI kurallari.
-- v182: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: demo seceneklerinden ana tasarima gecis.
-- v183: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: stabilite paneli alternatif chart arayisi.
-- v184: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: nokta kalinligi ve hover hassasiyeti.
-- v185: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: elit radar yerlesim ve tipografi.
-- v186: Chart tasarim denemeleri, paylasim akisi ve panel gorsel rafine turlari yogun sekilde uygulandi; odak: renk hiyerarsisi ve kontrast ayari.
-- v187: Export/chart regresyonlari sonrasi geri donus icin stabil v187 noktasi kullanildi.
-- v188: HTML export, chart render, menuler ve panel bosluklari icin duzeltme iterasyonlari yapildi; odak: exportte chart tekrar canlandirma.
-- v189: HTML export, chart render, menuler ve panel bosluklari icin duzeltme iterasyonlari yapildi; odak: menu gorunum sirasinin duzeltilmesi.
-- v190: HTML export, chart render, menuler ve panel bosluklari icin duzeltme iterasyonlari yapildi; odak: panel bosluk/padding ince ayari.
-- v191: HTML export, chart render, menuler ve panel bosluklari icin duzeltme iterasyonlari yapildi; odak: export ozelinde gereksiz UI temizligi.
-- v192: HTML export, chart render, menuler ve panel bosluklari icin duzeltme iterasyonlari yapildi; odak: ilk-acilis popup regresyon duzeltmesi.
-- v193: HTML export, chart render, menuler ve panel bosluklari icin duzeltme iterasyonlari yapildi; odak: paylasim gorunumunde menu kisitlari.
-- v194: HTML export, chart render, menuler ve panel bosluklari icin duzeltme iterasyonlari yapildi; odak: kapanis ikonlari gorunurluk kurali.
-- v195: HTML export, chart render, menuler ve panel bosluklari icin duzeltme iterasyonlari yapildi; odak: chart dataset baglama dogrulamalari.
-- v196: HTML export, chart render, menuler ve panel bosluklari icin duzeltme iterasyonlari yapildi; odak: exportte chart tekrar canlandirma.
-- v197: VRM/heatmap panel duzeni bozulmalarina karsi stabil geri donus noktasi v197 oldu.
-- v198: Paylas popup, menu hiyerarsisi, tema tutarliligi ve ust bar ince ayarlari yapildi; odak: paylas popup renk/sadelik duzenlemesi.
-- v199: Paylas popup, menu hiyerarsisi, tema tutarliligi ve ust bar ince ayarlari yapildi; odak: ust menu buton dizilim rafinesi.
-- v200: Paylas popup, menu hiyerarsisi, tema tutarliligi ve ust bar ince ayarlari yapildi; odak: dil secici konum ve genislik ayari.
-- v201: Paylas popup, menu hiyerarsisi, tema tutarliligi ve ust bar ince ayarlari yapildi; odak: logo metin/versiyon gorunum senkronu.
-- v202: Paylas popup, menu hiyerarsisi, tema tutarliligi ve ust bar ince ayarlari yapildi; odak: hover davranisi ve tiklanabilirlik hissi.
-- v203: Paylas popup, menu hiyerarsisi, tema tutarliligi ve ust bar ince ayarlari yapildi; odak: light/dark gorunum tutarliligi.
-- v204: Paylas popup, menu hiyerarsisi, tema tutarliligi ve ust bar ince ayarlari yapildi; odak: border/dolgu sadelestirme.
-- v205: Paylas popup, menu hiyerarsisi, tema tutarliligi ve ust bar ince ayarlari yapildi; odak: ikon olcegi ve spacing duzeltmesi.
-- v206: Paylas popup, menu hiyerarsisi, tema tutarliligi ve ust bar ince ayarlari yapildi; odak: mobil menu gecis iyilestirmesi.
-- v207: Paylas popup, menu hiyerarsisi, tema tutarliligi ve ust bar ince ayarlari yapildi; odak: paylas popup renk/sadelik duzenlemesi.
-- v208: Paylas popup, menu hiyerarsisi, tema tutarliligi ve ust bar ince ayarlari yapildi; odak: ust menu buton dizilim rafinesi.
-- v209: Header menu yerlesimi ve paylas/dil buton dizilimi modernize edilerek v209 tamamlandi.
-- v210: Surum goruntuleme formati vX.Y modeline gecirildi (or. v210 -> v21.0).
-- v211: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: logo amblem renk geri dengelemesi.
-- v212: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: turuncu tema pilotu ve geri bildirim.
-- v213: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: light mod dosya yoneticisi hover esitligi.
-- v214: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: master KPI border eslesme duzeltmesi.
-- v215: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: radar metin kontrast dengelemesi.
-- v216: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: menu ikon olcek/denge ince ayari.
-- v217: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: tema buton yerlesim optimizasyonu.
-- v218: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: renk tokenlarinin duzenlenmesi.
-- v219: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: acik/koyu farkliliklarin kapatilmasi.
-- v220: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: logo amblem renk geri dengelemesi.
-- v221: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: turuncu tema pilotu ve geri bildirim.
-- v222: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: light mod dosya yoneticisi hover esitligi.
-- v223: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: master KPI border eslesme duzeltmesi.
-- v224: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: radar metin kontrast dengelemesi.
-- v225: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: menu ikon olcek/denge ince ayari.
-- v226: Logo, tema gecisleri, ikonlar, light/dark uyumu ve turuncu varyant ince ayarlari devam etti; odak: tema buton yerlesim optimizasyonu.
-- v227: Mor/turuncu accent ve light/dark kombinasyonu kalici, kayitli tercih mantigiyla stabilize edildi.
-- v228: QA, hover etkileri, menuler ve kutu stilleri uzerinde son polisaj turlari yapildi; odak: menu hover tepkileri.
-- v229: QA, hover etkileri, menuler ve kutu stilleri uzerinde son polisaj turlari yapildi; odak: kutu kenarlik/surface final polish.
-- v230: QA, hover etkileri, menuler ve kutu stilleri uzerinde son polisaj turlari yapildi; odak: genel UI tutarlilik kontrolu.
-- v231: Perf demo hatti icin ayri master yedek referansi v231 olarak alindi.
-- v232: Kucuk performans kazanimi, veri kalite karti sadeleme ve menu etkilesim iyilestirmeleri yapildi; odak: kritik olmayan render maliyetlerinin kisilmasi.
-- v233: Kucuk performans kazanimi, veri kalite karti sadeleme ve menu etkilesim iyilestirmeleri yapildi; odak: veri kalite kartinda gorsel sadeleme.
-- v234: Kucuk performans kazanimi, veri kalite karti sadeleme ve menu etkilesim iyilestirmeleri yapildi; odak: menu etkilesimindeki mikro duzeltmeler.
-- v235: Kucuk performans dokunuslari sonrasi genel stabil durum master checkpoint olarak kaydedildi.
-- v236: Ops panel modernizasyonu, auth/session guclendirme ve analiz/ulke dagilimi ozellikleri gelistirildi; odak: panel bilgi mimarisi sadelestirmesi.
-- v237: Ops panel modernizasyonu, auth/session guclendirme ve analiz/ulke dagilimi ozellikleri gelistirildi; odak: oturum dayanikliligi ve login akis guclendirme.
-- v238: Ops panel modernizasyonu, auth/session guclendirme ve analiz/ulke dagilimi ozellikleri gelistirildi; odak: ulke dagilimi chart entegrasyonu.
-- v239: Ops panel modernizasyonu, auth/session guclendirme ve analiz/ulke dagilimi ozellikleri gelistirildi; odak: sunucu durum widgetlari zenginlestirmesi.
-- v240: Uzun sureli rollback politikasi icin manuel master referans surumu olarak sabitlendi.
-- v241: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: alt etki alanina gecis planlamasi.
-- v242: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: Nginx route/ssl sertifikasyon duzeni.
-- v243: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: DB baglantisi ve paylasim veri modeli.
-- v244: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: ops panel metrik toplama genislemesi.
-- v245: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: yedek klasor hiyerarsisi netlestirme.
-- v246: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: geri yukleme talimat dosyasi olusturma.
-- v247: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: erisim kisimlarinda sertlestirme.
-- v248: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: deploy script stabilizasyonu.
-- v249: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: saglik kontrolleri ve smoke testler.
-- v250: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: alt etki alanina gecis planlamasi.
-- v251: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: Nginx route/ssl sertifikasyon duzeni.
-- v252: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: DB baglantisi ve paylasim veri modeli.
-- v253: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: ops panel metrik toplama genislemesi.
-- v254: VPS tasima hazirligi, DB tabanli paylasim/panel ve guvenlik-basliklari ile yedek otomasyonu olgunlastirildi; odak: yedek klasor hiyerarsisi netlestirme.
-- v255: oc.colortr.com uzerinde VPS ana uretim tabani, DB baglantili akisla stabil hale getirildi.
-- v256: Eski /bitaxe-oc bagimliligi birakilip uygulama kok yol yapisina normalize edildi.
-- v257: Yedek stratejisi demo/bench haric tutacak sekilde optimize edilip yerel arsiv sadeletildi.
-- v258: Dosya ve rapor iceriklerindeki eski colortr.com/bitaxe-oc referanslari temizlendi.
-- v259: Paylasim, DB, guvenlik ve regresyon akislarinda toplu dogrulama/duzeltme turu yapildi.
-- v260: Ops panel oturum surdurme davranisi iyilestirilerek tekrar tekrar login ihtiyaci azaltildi.
-- v261: Ops panel process listesi CPU/RAM odakli izleme ve siralama ihtiyacina gore gelistirildi.
-- v262: VPS runtime/paket denetimi yapilarak bakim ve uyumluluk duzenlemeleri uygulandi.
-- v263: Derin kod incelemesi faz-1 bulgulari guvenlik, performans ve test kapsamina yansitildi.
-- v264: Derin inceleme faz-2 aksiyonlariyla hata riskleri azaltildi ve kod tabani sadeletildi.
-- v265: Derin inceleme faz-3 ile sertlestirme, temizlik ve stabilizasyon adimlari tamamlandi.
-- v266: Son polish oncesi genel stabilizasyon ve deploy hazirlik turu yapildi.
-- v267: Ops panel gorsel hatlari sonrasi task manager scrollbar iyilestirmesine zemin hazirlandi.
-- v268: Ops panel gorev yoneticisi kaydirma cubugu daraltilip daha koyu, daha temiz stile getirildi.
-- v269: Acik/koyu tema gecisine adaptif animasyon motoru eklendi (View Transition + fallback + reduced-motion uyumu).
-- v270: Tum gecmis surumler icin geriye donuk tek-cumle formatinda kapsamli VERSION_LOG kaydi olusturuldu.
-- v271: v61 oncesi tamamen frontend olan donem notu loga eklendi; v61+ backend gecis cizgisi netlestirildi.
-- v272: Tekrarlanan surum aciklamalari farklilastirildi ve uzun bloklar version-bazli odak notlariyla cesitlendirildi.
-- v273: Secret hijyeni sertlestirildi; Config env/dis-config override katmani eklendi, duz metin DB sifreleri kaynaktan cikarildi ve Nginx statik header kapsami genisletildi.
-- v274: Proxy guven zinciri sertlestirildi (trusted proxy allowlist), DB fallback dogrulamasi guclendirildi, recoverable log flood throttling ve testlerde SKIP/unknown-share kabul kontrolleri iyilestirildi.
-- v275: Canli deploy ve tum master test fazlari (HTTP+E2E+bench) tamamlanarak stabilite master seviyesinde dogrulandi.
-- v276: Ops panel oturumu frontend session’dan ayrildi (ayri cookie/ad/CSRF), varsayilan panel timeout 30 gun yapildi ve Safari kaynakli sik logout sorunu azaltildi.
-- v277: Ops panel icin imzali 30 gunluk remember-cookie auto re-auth katmani eklendi; session dusse bile sifre istemeden panel oturumu geri yuklenir hale getirildi.
-- v278: Ops panel cookie davranisi sertlestirildi; session/remember cerezleri Lax uyumlulugunda tek host akisina sabitlendi.
-- v279: Oturum kesintisi vakalari icin canli auth akisinda ince ayar ve test tekrarlarina odaklanildi.
-- v280: Ops panelde session touch + remember yenileme periyodu optimize edilerek saniyelik cookie churn kaldirildi ve uzun sureli login stabilitesi guclendirildi.
-- v281: Mevcut paneli bozmadan yeni nesil arayuzlu `ops-panel2.php` eklendi (zaman araligi filtreleri, chart dashboard, icgoru kutusu, filtreli CSV export ve canli server-status entegrasyonu).
-- v282: `ops-panel2` ust bolumde kompakt server status ile yenilendi (solda 4 dikey cekirdek metrik + sagda kucuk gorev yoneticisi), recent runs scrollbar rengi ozellestirildi ve operasyonel health chip’leri eklendi.
-- v283: `ops-panel2` ilk tasarima geri yaklastirildi: server status ustte kalirken kullanim kutulari daraltildi, gorev yoneticisi 4 satira indirildi, process ve recent-runs tablolarina tum sutunlarda tiklanabilir cift yonlu siralama eklendi.
-- v284: `ops-panel2` duzeni rafine edildi; marka/topbar satiri panelin en ustune tasindi, server kart sirasi DB->Disk->RAM->CPU yapildi ve DB size etiketinde gereksiz `.00` son eki temizlendi.
-- v285: `ops-panel2` advanced suite ile buyutuldu (Error Intelligence, SLO/latency, Security Monitoring, Upload Funnel, Share Lifecycle, DB Health, Alert Center, kaydedilebilir view/kolon gorunurlugu) ve `ops-panel.php` UI rotasi yeni panele yonlendirildi.
-- v286: Paylasim acilisinda unknown-token fallback yarisi duzeltildi (pre-readonly kaldirildi, upload overlay `share-loading-hidden` ile gizlenip fallbackte aninda normale donuyor) ve master testte 44/44 gecildi.
-- v287: Ops panel tek dosya mimarisine alindi; `ops-panel2.php` kaldirilarak gelismis panel arayuzu ve `ajax=server_status` guvenli backend ayni `ops-panel.php` icinde birlestirildi.
-- v288: AGENTS dokumanina net release/rollback checklist eklendi; ops panel gorev yoneticisi process metrikleri icin parser/fallback katmani guclendirilerek CPU/RAM/RSS kolonlarinin 0-a kilitlenme riski giderildi.
-- v289: Workspace carpismasi taramasinda olusan kok dizin artik dosyalari temizlendi; deploy wrapper kontrolu sertlestirildi ve README/DEPLOYMENT_TR referanslari mevcut VPS/app-only yapiyla uyumlu hale getirildi.
-- v290: P0/P1 sertlestirme turu tamamlandi; master backup scripti DB fallback/preflight ile guclendirildi, CI PHP 8.5 smoke genisletildi ve otomatik security tarama workflow'u eklendi.
-- v291: Canli sertlestirme tamamlandi; `oc_app` DB yetkileri least-privilege'a indirildi ve backup script ciktisinda `.tmp` yol raporlama hatasi duzeltildi.
-- v292: Ops panel server status yenilemesi 1 sn dinamik intervale alindi, UI'daki sabit `Auto 5s` metni kaldirildi ve MySQL DB size/row metrikleri icin information_schema fallback sorgulari eklendi.
-- v293: Ops panelde DB size'in sifir kalma kok nedeni giderildi; DB parola cozumu env disinda `app/.db_password` dosyasindan da okunacak sekilde sertlestirildi ve panel metrikleri yeniden DB moduna alindi.
-- v294: Telegram uzaktan yonetim koprusu eklendi (`scripts/tg_bridge.py`); allowlist chat id, komut whitelisti ve proje-bazli (oc) durum/test/master/log akislariyla telefondan kontrol altyapisi hazirlandi.
-- v295: Telegram koprusu normal mesaja gecirildi; dogal dil intent algilama, insan-dili cevaplar, onayli agir islem akisi (evet/iptal) ve canli denetim aksiyonu eklendi.
-- v296: Telegram asistaninda `stabil mi` gibi dogal ifadeler dogrudan durum niyetine baglandi ve olay izleme (`tg_bridge_events.log`) eklendi; boylece sahadaki cevap akisi anlik izlenebilir hale geldi.
-- v297: Telegram bridge LLM-first moda alindi; serbest metin cevaplari dogal dille doner hale getirildi, fallback akisi sadeletildi ve status/log komutlari PM2 bagimliligindan cikarilarak `/root/.pm2` EROFS hatasi giderildi.
-- v298: Telegram bridge production audit checklistine gore sertlestirildi; `ACTION:<none>` parser destegi, allowlist disi `blocked_chat` loglama, LLM action safety-gate, wrapper-exec kontrolleri ve event log izin/icerik kisitlari eklendi.
-- v299: Dosya yoneticisi yukleme ekranina `bitaxe-benchmark-webgui` export uyumluluk notu ve kaynak linki eklendi; metin TR/EN dil paketlerine baglanarak i18n akisina dahil edildi.
-- v300: Upload export uyumluluk notu tum aktif dil paketlerine eklendi (`upload.exportHint`); boylece dosya yoneticisi metni tum dillerde fallback olmadan dogru sekilde gosterilir hale geldi.
-- v301: Upload ekranindaki export kaynak notu kutu icine tasindi; `upload.subtitle` satirinin hemen altinda gosterilecek sekilde yerlesim duzeltildi.
-- v302: Export kaynak notu kutu disina, upload kutusunun hemen ustune tasindi; link tekrar tiklanabilir hale getirilirken kutu ile bosluk minimuma indirildi.
-- v303: Ops panelde `ZZ/unknown` gorunen ulke-dil loglari icin kalici telemetry duzeltmesi yapildi; frontend usage payload'ina browser dil/ulke/zaman bilgisi eklendi ve backendde `country_hint` + browser-language fallback katmani devreye alindi.
-- v304: P0 refactor baslatildi; API endpointlerdeki tekrar eden runtime/context/POST+same-origin bootstrap akisi `ApiBootstrap` yardimcilarina merkezilestirildi ve P0/P1 patch+acceptance plani eklendi.
-- v305: P0-2 ilk dilim tamamlandi; ops-panel icindeki DB metrik/sorgu yardimcilari `app/OpsDbMetrics.php` servisine tasinip panel fonksiyonlari servis delegasyonuna cevrildi (davranis degismeden).
-- v306: P0-2 ikinci dilim tamamlandi; ops-panel process toplama ve cache akislari `app/OpsProcessMetrics.php` servisine tasinip `collectTopProcessMetrics*` fonksiyonlari servis delegasyonuna alindi.
-- v307: P0-3 baslatildi; ShareStore icin DB-driver + file-fallback create/read/meta/dedupe/unknown-token unit test kapsami genisletildi ve DB token okuma/touch query path'i davranis degismeden ortak yardimcilara sadelelestirildi.
-- v308: P1 tamamlandi; Security modulu country/transient alt servislerine bolundu ve UsageLogger driver dispatch akisi `UsageLoggerAdapter` + file/db adapter katmani ile ayrilarak fallback davranisi korunup merkezilestirildi.
-- v309: Ops panel DB Health kartinda surekli flicker etkisi giderildi; chart her refresh'te destroy/create yerine instance reuse + degisiklik imzasi kontrolu ile sadece veri degistiginde animasyonsuz update olacak sekilde optimize edildi.
-- v315: PostMessage/popup tabanli gecici import denemeleri guvenli sekilde temizlenip kod tabani yeniden v309 stabil hattina indirildi; yeni token-tabanli import mimarisi icin temiz baseline hazirlandi.
-- v316: Yeni importId mimarisi canliya alindi; `api/autotune/import(.php)` + `api/autotune/consume(.php)` endpointleri, one-time consume akisi, `/import/<id>` landing route rewrite'lari ve frontend auto-import entegrasyonu eklendi; master test (HTTP+E2E+bench) 100% gecti.
-- v317: `/import/<id>` acilisinda relatif API yolundan kaynaklanan `autotune import verisi yuklenemedi` hatasi giderildi; frontend API endpointleri `APP_BASE_PATH` ile absolute hale getirildi ve HTTP audit'e import-route regression testi eklendi.
-- v318: Dosya yoneticisi acikken "Ornek dosyayla goruntule" butonu veri var/yok fark etmeksizin gorunur hale getirildi; import sonrasinda da kullanicilarin ornek veriyle hizli karsilastirma yapabilmesi saglandi.
-- v319: Import URL temizleme davranisi kaldirildi; `/import/<id>` adresi ekranda kalirken ayni sekmede yenilemede tek-kullanimli token 410 donse bile session cache'ten CSV geri yuklenerek analizin kesilmesi onlendi.
-- v320: Import guvenlik sertlestirmesi yapildi; API katmaninda dosya adi inert karakter setine normalize edilerek potansiyel downstream XSS yansima riski azaltildi, Autotune import one-time consume + filename hardening unit testi ve canli HTTP audit guvenlik regresyon testi eklendi.
-- v321: Paylasim URL uretimi import yolundan ayrilip kisa kanonik formata (`/i?share=...`) sabitlendi; import acilisinda dosya yoneticisi overlay'indeki "Ornek dosyayla goruntule" gorunurlugu share-only prefetchte gizlenip import akisinda aktif tutuldu.
-- v322: Tuketilmis/gecersiz import token acilisinda otomatik yukleme overlay'i yerine dashboard gorunumu korunacak sekilde init akisi guncellendi; Dosya Yonetici butonu bu durumda manuel acilis icin gorunur tutuldu ve "Ornek dosyayla goruntule" butonu sadece dosya yoneticisi acildiginda gorunur kaldi.
-- v323: Dis URL semasi import/share icin tek tipe alinip `/r/<hexToken>` rotasi eklendi; import API cikisi yeni rota ile uretildi, share link builder `/r` kullanimina tasindi ve init fallback akisi import->share sirasiyla tek route token uzerinden cozulecek sekilde duzenlendi.
+- v61: The pipeline has been launched on the first stable base master (index_master.html).
+- v62: This version has been canceled and is not put into active development.
+- v63: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: the backbone of the file upload stream.
+- v64: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: API route separation and endpoint cleaning.
+- v65: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: session/authentication basis.
+- v66: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: security header and CSP hardening.
+- v67: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: error trapping and user messages.
+- v68: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: infrastructure preparation for sharing permanence.
+- v69: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: server limit/timeout settings.
+- v70: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: deploy-script and backup steps.
+- v71: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: rollback scenario assurances.
+- v72: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: go-live checklist.
+- v73: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: the backbone of the file upload stream.
+- v74: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: API route separation and endpoint cleaning.
+- v75: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: session/authentication basis.
+- v76: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: security header and CSP hardening.
+- v77: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: error trapping and user messages.
+- v78: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: infrastructure preparation for sharing permanence.
+- v79: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: server limit/timeout settings.
+- v80: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: deploy-script and backup steps.
+- v81: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: rollback scenario assurances.
+- v82: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: go-live checklist.
+- v83: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: the backbone of the file upload stream.
+- v84: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: API route separation and endpoint cleaning.
+- v85: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: session/authentication basis.
+- v86: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: security header and CSP hardening.
+- v87: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: error trapping and user messages.
+- v88: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: infrastructure preparation for sharing permanence.
+- v89: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: server limit/timeout settings.
+- v90: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: deploy-script and backup steps.
+- v91: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: rollback scenario assurances.
+- v92: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: go-live checklist.
+- v93: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: the backbone of the file upload stream.
+- v94: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: API route separation and endpoint cleaning.
+- v95: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: session/authentication basis.
+- v96: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: security header and CSP hardening.
+- v97: Backend migration infrastructure, security hardening and cPanel subdirectory work was progressed iteratively; focus: error trapping and user messages.
+- v98: The basic design and flow was restored by reverting to bitaxe-oc_master_backend_v98 backup.
+- v99: After the v98 rollback, rounds of stabilization and corrections were made.
+- v100: After the v98 rollback, rounds of stabilization and corrections were made.
+- v101: The base was fixed by creating a v101 reference state for the master backend.
+- v102: Sharing, export, filter, chart and security flows have been successively improved; focus: share link token behavior.
+- v103: Sharing, export, filter, chart and security flows have been successively improved; focus: HTML export output integrity.
+- v104: Sharing, export, filter, chart and security flows have been successively improved; focus: table sync with filters.
+- v105: Sharing, export, filter, chart and security flows have been successively improved; focus: chart data binding consistency.
+- v106: Sharing, export, filter, chart and security flows have been successively improved; focus: close/drag-drop interaction.
+- v107: Sharing, export, filter, chart and security flows have been successively improved; focus: language selection and locale flow.
+- v108: Sharing, export, filter, chart and security flows have been successively improved; focus: alert boxes and UI feedback.
+- v109: Sharing, export, filter, chart and security flows have been successively improved; focus: export security restrictions.
+- v110: Sharing, export, filter, chart and security flows have been successively improved; focus: menu layout and button behavior.
+- v111: Sharing, export, filter, chart and security flows have been successively improved; focus: share link token behavior.
+- v112: Sharing, export, filter, chart and security flows have been successively improved; focus: HTML export output integrity.
+- v113: Sharing, export, filter, chart and security flows have been successively improved; focus: table sync with filters.
+- v114: Sharing, export, filter, chart and security flows have been successively improved; focus: chart data binding consistency.
+- v115: v115 was created as a stable reference point before HTML/export corruptions.
+- v116: Drag-drop, filter and chart interaction fixes and undo steps have been implemented; focus: drag-drop targeting behavior.
+- v117: Drag-drop, filter and chart interaction fixes and undo steps have been implemented; focus: restoring filter fields.
+- v118: Drag-drop, filter and chart interaction fixes and undo steps have been implemented; focus: chart tooltip and hover stability.
+- v119: Drag-drop, filter and chart interaction fixes and undo steps have been implemented; focus: reversing changes that cause side effects.
+- v120: Drag-and-drop behavior has been fixed and v120 has been saved as the new stable master.
+- v121: SEO, major testing expansion and mobile interface improvements were implemented in phases; focus: meta/robots settings.
+- v122: SEO, major testing expansion and mobile interface improvements were implemented in phases; focus: smoke+regression testing coverage increase.
+- v123: SEO, major testing expansion and mobile interface improvements were implemented in phases; focus: mobile top menu transitions.
+- v124: SEO, major testing expansion and mobile interface improvements were implemented in phases; focus: page opening performance observations.
+- v125: SEO, major testing expansion and mobile interface improvements were implemented in phases; focus: fine-tuning based on reported bugs.
+- v126: Stable v126 reference was kept for fallback before/after Tailwind static CSS trial.
+- v127: The mobile appearance optimization phase has officially started with v127.
+- v128: Master test files package (v128) was created and pinned to the benchmark flow.
+- v129: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: header hide/show triggers.
+- v130: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: balance of logo spacing and top margin.
+- v131: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: hamburger menu access rule.
+- v132: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: table column width optimization.
+- v133: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: mobile filter button/sort order.
+- v134: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: slider and input conflict solutions.
+- v135: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: collapsing/editing the master column.
+- v136: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: right-left leash problems.
+- v137: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: touch-operation ergonomics.
+- v138: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: balance of horizontal scrolling and readability.
+- v139: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: header hide/show triggers.
+- v140: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: balance of logo spacing and top margin.
+- v141: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: hamburger menu access rule.
+- v142: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: table column width optimization.
+- v143: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: mobile filter button/sort order.
+- v144: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: slider and input conflict solutions.
+- v145: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: collapsing/editing the master column.
+- v146: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: right-left leash problems.
+- v147: Fixed mobile sticky header, menu behavior and dataminer table layout iteratively; focus: touch-operation ergonomics.
+- v148: Fixed v148 as the solid fallback point before unsuccessful drag-drop rewrite.
+- v149: The new drag-drop architecture was tried, a backup was kept, but it was not taken into the main line.
+- v150: After returning to the v148 base, drag-drop behavior has become simple and stable again.
+- v151: After returning to the v148 base, drag-drop behavior has become simple and stable again.
+- v152: Drag-drop and panel balance were recovered and v152 was recorded as a stable checkpoint.
+- v153: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: stability panel alternative chart search.
+- v154: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: dot thickness and hover sensitivity.
+- v155: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: elite radar layout and typography.
+- v156: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: color hierarchy and contrast adjustment.
+- v157: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: metric label/value alignment.
+- v158: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: box interior space and grid balance.
+- v159: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: frequency performance style iteration.
+- v160: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: heatmap and VRM panel polish.
+- v161: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: UI rules locked in shared view.
+- v162: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: moving from demo options to main design.
+- v163: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: stability panel alternative chart search.
+- v164: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: dot thickness and hover sensitivity.
+- v165: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: elite radar layout and typography.
+- v166: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: color hierarchy and contrast adjustment.
+- v167: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: metric label/value alignment.
+- v168: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: box interior space and grid balance.
+- v169: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: frequency performance style iteration.
+- v170: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: heatmap and VRM panel polish.
+- v171: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: UI rules locked in shared view.
+- v172: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: moving from demo options to main design.
+- v173: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: stability panel alternative chart search.
+- v174: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: dot thickness and hover sensitivity.
+- v175: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: elite radar layout and typography.
+- v176: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: color hierarchy and contrast adjustment.
+- v177: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: metric label/value alignment.
+- v178: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: box interior space and grid balance.
+- v179: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: frequency performance style iteration.
+- v180: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: heatmap and VRM panel polish.
+- v181: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: UI rules locked in shared view.
+- v182: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: moving from demo options to main design.
+- v183: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: stability panel alternative chart search.
+- v184: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: dot thickness and hover sensitivity.
+- v185: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: elite radar layout and typography.
+- v186: Chart design experiments, sharing flow and panel visual refinement types were intensively implemented; focus: color hierarchy and contrast adjustment.
+- v187: Stable v187 point was used for return after export/chart regressions.
+- v188: Correction iterations were made for HTML export, chart rendering, menus and panel spacing; focus: export chart revival.
+- v189: Correction iterations were made for HTML export, chart rendering, menus and panel spacing; focus: correction of menu display order.
+- v190: Correction iterations were made for HTML export, chart rendering, menus and panel spacing; focus: panel gap/padding fine tuning.
+- v191: Correction iterations were made for HTML export, chart rendering, menus and panel spacing; focus: unnecessary UI cleaning especially for export.
+- v192: Correction iterations were made for HTML export, chart rendering, menus and panel spacing; focus: first-start popup regression fix.
+- v193: Correction iterations were made for HTML export, chart rendering, menus and panel spacing; focus: menu restrictions in share view.
+- v194: Correction iterations were made for HTML export, chart rendering, menus and panel spacing; focus: closing icons visibility rule.
+- v195: Correction iterations were made for HTML export, chart rendering, menus and panel spacing; focus: chart dataset binding validations.
+- v196: Correction iterations were made for HTML export, chart rendering, menus and panel spacing; focus: export chart revival.
+- v197: The stable return point against VRM/heatmap panel layout corruptions was v197.
+- v198: Share popup, menu hierarchy, theme consistency and top bar tweaks were made; focus: share popup color/simplicity arrangement.
+- v199: Share popup, menu hierarchy, theme consistency and top bar tweaks were made; focus: top menu button layout refinement.
+- v200: Share popup, menu hierarchy, theme consistency and top bar tweaks were made; focus: language selector position and width adjustment.
+- v201: Share popup, menu hierarchy, theme consistency and top bar tweaks were made; focus: logo text/version view sync.
+- v202: Share popup, menu hierarchy, theme consistency and top bar tweaks were made; focus: hover behavior and clickability feel.
+- v203: Share popup, menu hierarchy, theme consistency and top bar tweaks were made; focus: light/dark view consistency.
+- v204: Share popup, menu hierarchy, theme consistency and top bar tweaks were made; focus: border/padding simplification.
+- v205: Share popup, menu hierarchy, theme consistency and top bar tweaks were made; focus: icon scale and spacing fix.
+- v206: Share popup, menu hierarchy, theme consistency and top bar tweaks were made; focus: mobile menu navigation improvement.
+- v207: Share popup, menu hierarchy, theme consistency and top bar tweaks were made; focus: share popup color/simplicity arrangement.
+- v208: Share popup, menu hierarchy, theme consistency and top bar tweaks were made; focus: top menu button layout refinement.
+- v209: V209 was completed by modernizing the header menu layout and share/language button layout.
+- v210: The backup format has been changed to vX.Y model (ie v210 -> v21.0).
+- v211: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: logo emblem color back balancing.
+- v212: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: orange theme pilot and feedback.
+- v213: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: light mode file manager hover equality.
+- v214: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: master KPI border matching fix.
+- v215: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: radar text contrast compensation.
+- v216: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: menu icon scale/balance fine tuning.
+- v217: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: theme button placement optimization.
+- v218: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: arrangement of color tokens.
+- v219: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: closing light/dark differences.
+- v220: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: logo emblem color back balancing.
+- v221: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: orange theme pilot and feedback.
+- v222: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: light mode file manager hover equality.
+- v223: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: master KPI border matching fix.
+- v224: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: radar text contrast compensation.
+- v225: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: menu icon scale/balance fine tuning.
+- v226: Logo, theme transitions, icons, light/dark harmony and orange variant tweaks continued; focus: theme button placement optimization.
+- v227: The purple/orange accent and light/dark combination has been stabilized with permanent, saved preference logic.
+- v228: QA, final rounds of polishing on hover effects, menus and box styles; focus: menu hover reactions.
+- v229: QA, final rounds of polishing on hover effects, menus and box styles; focus: box border/surface final polish.
+- v230: QA, final rounds of polishing on hover effects, menus and box styles; focus: general UI consistency check.
+- v231: A separate master backup reference for the Perf demo line was taken as v231.
+- v232: Made minor performance gains, data quality card simplification and menu interaction improvements; focus: reducing non-critical rendering costs.
+- v233: Made minor performance gains, data quality card simplification and menu interaction improvements; focus: visual simplification on the data quality card.
+- v234: Made minor performance gains, data quality card simplification and menu interaction improvements; focus: micro-fixes to menu interaction.
+- v235: After small performance touches, the overall stable situation was recorded as a master checkpoint.
+- v236: Ops panel modernization, auth/session strengthening and analysis/country distribution features have been improved; focus: panel information architecture simplification.
+- v237: Ops panel modernization, auth/session strengthening and analysis/country distribution features have been improved; focus: session durability and login flow strengthening.
+- v238: Ops panel modernization, auth/session strengthening and analysis/country distribution features have been improved; focus: country distribution chart integration.
+- v239: Ops panel modernization, auth/session strengthening and analysis/country distribution features have been improved; focus: server status widgets enhancement.
+- v240: Fixed as manual master reference version for long-term rollback policy.
+- v241: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: planning migration to subdomain.
+- v242: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: Nginx route/ssl certification scheme.
+- v243: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: DB connection and sharing data model.
+- v244: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: ops panel metric collection expansion.
+- v245: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: sharpen the backup folder hierarchy.
+- v246: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: creating a restore instruction file.
+- v247: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: hardening in access parts.
+- v248: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: deploy script stabilization.
+- v249: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: health checks and smoke tests.
+- v250: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: planning migration to subdomain.
+- v251: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: Nginx route/ssl certification scheme.
+- v252: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: DB connection and sharing data model.
+- v253: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: ops panel metric collection expansion.
+- v254: VPS migration preparation, DB-based sharing/panel and security-headers and backup automation have been matured; focus: sharpen the backup folder hierarchy.
+- v255: VPS main production base on oc.colortr.com has been stabilized with DB connected flow.
+- v256: The old /bitaxe-oc dependency was dropped and the application was normalized to the root path structure.
+- v257: The backup strategy has been optimized to exclude demo/bench and the local archive has been simplified.
+- v258: Old colortr.com/bitaxe-oc references in the file and report contents have been cleaned.
+- v259: Performed a batch round of validation/fixing on sharing, DB, security and regression flows.
+- v260: Ops panel session maintenance behavior has been improved, reducing the need to log in repeatedly.
+- v261: Ops panel process list was developed according to the need for CPU/RAM focused monitoring and sorting.
+- v262: VPS runtime/package audit was performed and maintenance and compatibility regulations were implemented.
+- v263: Deep code review phase-1 findings were reflected in security, performance and testing scope.
+- v264: With deep review phase-2 actions, error risks were reduced and the code base was simplified.
+- v265: Deep examination phase-3 and hardening, cleaning and stabilization steps were completed.
+- v266: Before the final polishing, a general stabilization and deployment preparation tour was carried out.
+- v267: After the ops panel visual lines, the groundwork was prepared for the task manager scrollbar improvement.
+- v268: Ops panel task manager scroll bar collapsed to darker, cleaner style.
+- v269: Added adaptive animation engine to light/dark theme transition (View Transition + fallback + reduced-motion adaptation).
+- v270: A comprehensive VERSION_LOG record was created for all previous versions in a retrospective single-sentence format.
+- v271: The period note, which was completely frontend before v61, was added to the log; v61+ backend migration line clarified.
+- v272: Repeated version descriptions have been differentiated and long blocks have been diversified with version-based focus notes.
+- v273: Secret hygiene has been toughened; Added config env/dis-config override layer, stripped plaintext DB passwords from source, and expanded Nginx static header scope.
+- v274: The proxy trust chain has been hardened (trusted proxy allowlist), DB fallback verification has been strengthened, recoverable log flood throttling and SKIP/unknown-share acceptance checks in tests have been improved.
+- v275: Live deployment and all master test phases (HTTP+E2E+bench) were completed and stability was verified at the master level.
+- v276: Ops panel session was separated from frontend session (separate cookie/name/CSRF), default panel timeout was changed to 30 days and frequent logout problem caused by Safari was reduced.
+- v277: A signed 30-day remember-cookie auto re-auth layer has been added for the Ops panel; Even if the session is lost, the panel session can be restored without requiring a password.
+- v278: Ops panel cookie behavior has been hardened; Session/remember cookies are fixed to a single host flow in Lax compatibility.
+- v279: Focused on fine-tuning and testing retests of the live auth flow for session interruption cases.
+- v280: By optimizing the session touch + remember refresh period in the Ops panel, the second cookie churn was removed and long-term login stability was strengthened.
+- v281: 'ops-panel2.php' with a new generation interface was added without disrupting the existing panel (time interval filters, chart dashboard, insight box, filtered CSV export and live server-status integration).
+- v282: 'ops-panel2' has been revamped with compact server status at the top (4 vertical core metrics on the left + small task manager on the right), recent runs scrollbar color has been customized and operational health chips have been added.
+- v283: `ops-panel2` has been brought back to the original design: usage boxes have been collapsed while the server status remains at the top, the task manager has been reduced to 4 rows, and clickable two-way sorting has been added in all columns to the process and recent-runs tables.
+- v284: Refined the `ops-panel2` layout; moved the brand/topbar row to the top of the panel, changed the server card row to DB->Disk->RAM->CPU, and removed the unnecessary `.00` suffix in the DB size tag.
+- v285: `ops-panel2` was enlarged with advanced suite (Error Intelligence, SLO/latency, Security Monitoring, Upload Funnel, Share Lifecycle, DB Health, Alert Center, saveable view/column visibility) and `ops-panel.php` UI route was redirected to the new panel.
+- v286: The unknown-token fallback half when opening the share has been corrected (pre-readonly has been removed, the upload overlay is hidden with `share-loading-hidden` and immediately returns to normal during fallback) and the master test was passed 44/44.
+- v287: Ops panel was moved to single file architecture; `ops-panel2.php` was removed and the advanced panel interface and `ajax=server_status` secure backend were combined in the same `ops-panel.php`.
+- v288: Net release/rollback checklist has been added to the AGENTS document; The risk of CPU/RAM/RSS columns being locked to 0 has been eliminated by strengthening the parser/fallback layer for process metrics in the ops panel task manager.
+- v289: The root directory leftover files created by the Workspace collision scan have been cleaned; Deploy wrapper control has been hardened and README/DEPLOYMENT_TR references have been made compatible with the current VPS/app-only structure.
+- v290: P0/P1 hardening round completed; Master backup script has been strengthened with DB fallback/preflight, CI PHP 8.5 smoke has been extended and automatic security scanning workflow has been added.
+- v291: Live hardening is complete; `oc_app` DB privileges were reduced to least-privilege and `.tmp` path reporting error in the backup script output was fixed.
+- v292: Ops panel server status refresh has been moved to a 1-second dynamic interval, the fixed 'Auto 5s' text in the UI has been removed, and information_schema fallback queries have been added for MySQL DB size/row metrics.
+- v293: The root cause of DB size remaining zero in the Ops panel has been resolved; DB password resolution was hardened to read from the `app/.db_password` file other than env, and panel metrics were put back into DB mode.
+- v294: Added Telegram remote administration bridge (`scripts/tg_bridge.py`); Control infrastructure was prepared from the phone with allowlist chat id, command whitelist and project-based (OC) status/test/master/log streams.
+- v295: Telegram bridge switched to normal message; Added natural language intent detection, human-language responses, heavy processing flow with confirmation (yes/cancel), and live control action.
+- v296: In the Telegram assistant, natural expressions such as `is it stable` are directly connected to the status intent and event tracking (`tg_bridge_events.log`) has been added; Thus, the response flow in the field could be monitored instantly.
+- v297: Telegram bridge was put into LLM-first mode; free text responses were converted to natural language, the fallback flow was simplified, and the `/root/.pm2` EROFS error was fixed by removing the status/log commands from the PM2 dependency.
+- v298: Hardened according to Telegram bridge production audit checklist; `ACTION:<none>` parser support, `blocked_chat` logging outside allowlist, LLM action safety-gate, wrapper-exec controls and event log permission/content restrictions have been added.
+- v299: Added `bitaxe-benchmark-webgui` export compatibility note and source link to the file manager installation screen; The text was included in the i18n stream by connecting to TR/EN language packages.
+- v300: Upload export compatibility note added to all active language packages (`upload.exportHint`); So file manager text is displayed correctly in all languages ​​without fallback.
+- v301: The export source note on the upload screen has been moved into the box; Fixed the layout to show just below the `upload.subtitle` line.
+- v302: Moved the export source note out of the box, just above the upload box; While the link was made clickable again, the space with the box was reduced to a minimum.
+- v303: A permanent telemetry correction was made for country-language logs showing 'ZZ/unknown' in the Ops panel; Browser language/country/time information was added to the frontend usage payload and `country_hint` + browser-language fallback layer was activated in the backend.
+- v304: P0 refactor started; The repetitive runtime/context/POST+same-origin bootstrap flow at API endpoints was centralized to `ApiBootstrap` helpers and the P0/P1 patch+acceptance scheme was added.
+- v305: P0-2 first slice completed; The DB metric/query helpers in the ops-panel were moved to the `app/OpsDbMetrics.php` service and the panel functions were converted to service delegation (without changing the behavior).
+- v306: P0-2 second slice completed; ops-panel process collection and cache flows were moved to the `app/OpsProcessMetrics.php` service and `collectTopProcessMetrics*` functions were transferred to the service delegation.
+- v307: P0-3 initialized; Extended DB-driver + file-fallback create/read/meta/dedupe/unknown-token unit test scope for ShareStore and simplified DB token read/touch query path to common helpers without changing behavior.
+- v308: P1 completed; The security module was divided into country/transient subservices and the UsageLogger driver dispatch flow was separated by the `UsageLoggerAdapter` + file/db adapter layer, thus preserving and centralizing the fallback behavior.
+- v309: The constant flicker effect on the Ops panel DB Health card has been eliminated; The chart was optimized to update without animation only when the data changes, with instance reuse + change signature control instead of destroy/create at every refresh.
+- v315: PostMessage/popup based temporary import attempts were safely cleaned and the code base was reduced to the v309 stable line again; A clean baseline has been prepared for the new token-based import architecture.
+- v316: The new importId architecture has gone live; `api/autotune/import(.php)` + `api/autotune/consume(.php)` endpoints, one-time consume flow, `/import/<id>` landing route rewrites and frontend auto-import integration have been added; master test (HTTP+E2E+bench) 100% passed.
+- v317: The 'autotune import data could not be loaded' error caused by the relative API path when opening `/import/<id>` has been fixed; Frontend API endpoints were made absolute with `APP_BASE_PATH` and import-route regression test was added to HTTP audit.
+- v318: When the file manager is open, the "View with sample file" button is now visible regardless of whether there is data or not; After import, users can make quick comparisons with sample data.
+- v319: Import URL sanitization behavior has been removed; The analysis was prevented from being interrupted by restoring the CSV from the session cache, even if the single-use token 410 returned when refreshing the same tab while the `/import/<id>` address remained on the screen.
+- v320: Import security hardening has been done; At the API layer, the filename was normalized to an inert character set, reducing the potential risk of downstream XSS reflection. Autotune import one-time consume + filename hardening unit test and live HTTP audit security regression test were added.
+- v321: Share URL generation has been moved away from the import path and fixed to the short canonical format (`/i?share=...`); The "Display with sample file" visibility in the file manager overlay during import opening was hidden in the share-only prefetch and kept active during the import flow.
+- v322: The init flow has been updated to preserve the dashboard view instead of the automatic loading overlay when opening a consumed/invalid import token; The File Manager button was kept visible for manual opening in this case, and the "View with sample file" button remained visible only when the file manager was opened.
+- v323: External URL scheme was unified for import/share and `/r/<hexToken>` route was added; The import API output was produced with the new route, the share link builder was moved to `/r` and the init fallback flow was arranged to be resolved through a single route token in the order import->share.
