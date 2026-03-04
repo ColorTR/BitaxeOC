@@ -2490,6 +2490,33 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                             </table>
                         </div>
                     </section>
+
+                    <section class="panel">
+                        <div class="card-title">
+                            <h3>Recent Import Runs</h3>
+                            <div class="card-title-actions">
+                                <small id="import-runs-count">0 rows</small>
+                            </div>
+                        </div>
+                        <div class="table-wrap runs-table-wrap" style="max-height: 340px; overflow:auto;">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th><button class="th-sort" data-table="imports" data-key="createdAt" type="button">Timestamp <span class="sort-indicator"></span></button></th>
+                                    <th><button class="th-sort" data-table="imports" data-key="status" type="button">Status <span class="sort-indicator"></span></button></th>
+                                    <th><button class="th-sort" data-table="imports" data-key="analysisMs" type="button">Analysis <span class="sort-indicator"></span></button></th>
+                                    <th><button class="th-sort" data-table="imports" data-key="filesProcessed" type="button">Files <span class="sort-indicator"></span></button></th>
+                                    <th><button class="th-sort" data-table="imports" data-key="bytesProcessed" type="button">Processed MB <span class="sort-indicator"></span></button></th>
+                                    <th><button class="th-sort" data-table="imports" data-key="rowsTotal" type="button">Rows <span class="sort-indicator"></span></button></th>
+                                    <th><button class="th-sort" data-table="imports" data-key="country" type="button">Country <span class="sort-indicator"></span></button></th>
+                                    <th><button class="th-sort" data-table="imports" data-key="language" type="button">Lang <span class="sort-indicator"></span></button></th>
+                                    <th><button class="th-sort" data-table="imports" data-key="sourceApi" type="button">Source <span class="sort-indicator"></span></button></th>
+                                </tr>
+                                </thead>
+                                <tbody id="import-runs-body"></tbody>
+                            </table>
+                        </div>
+                    </section>
                 </div>
 
                 <div class="stack">
@@ -2627,14 +2654,16 @@ if (session_status() === PHP_SESSION_ACTIVE) {
             let currentRange = 'all';
             let currentSearch = '';
             let filtered = allEntries.slice();
+            let filteredImports = [];
             let lastProcessRows = [];
             let lastServerView = null;
             let lastDbHealthSignature = '';
             const runsSortState = { key: 'createdAt', dir: 'desc' };
+            const importSortState = { key: 'createdAt', dir: 'desc' };
             const procSortState = { key: 'cpuPct', dir: 'desc' };
             const runColumnKeys = ['createdAt', 'status', 'analysisMs', 'filesProcessed', 'bytesProcessed', 'rowsTotal', 'country', 'language', 'theme', 'sourceApi'];
             let visibleRunColumns = new Set(runColumnKeys);
-            const viewStateKey = 'ops_panel_view_state_v3';
+            const viewStateKey = 'ops_panel_view_state_v4';
 
             const charts = {
                 activity: null,
@@ -2734,6 +2763,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                     range: currentRange,
                     search: currentSearch,
                     runsSort: { key: runsSortState.key, dir: runsSortState.dir },
+                    importSort: { key: importSortState.key, dir: importSortState.dir },
                     procSort: { key: procSortState.key, dir: procSortState.dir },
                     visibleColumns: Array.from(visibleRunColumns),
                 };
@@ -2764,10 +2794,15 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                     if (searchNode) searchNode.value = currentSearch;
 
                     const runsSort = parsed.runsSort || {};
+                    const importSort = parsed.importSort || {};
                     const procSort = parsed.procSort || {};
                     if (typeof runsSort.key === 'string' && typeof runsSort.dir === 'string') {
                         runsSortState.key = runsSort.key;
                         runsSortState.dir = runsSort.dir === 'asc' ? 'asc' : 'desc';
+                    }
+                    if (typeof importSort.key === 'string' && typeof importSort.dir === 'string') {
+                        importSortState.key = importSort.key;
+                        importSortState.dir = importSort.dir === 'asc' ? 'asc' : 'desc';
                     }
                     if (typeof procSort.key === 'string' && typeof procSort.dir === 'string') {
                         procSortState.key = procSort.key;
@@ -2835,7 +2870,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                 const sorted = rows.slice();
                 sorted.sort((ra, rb) => {
                     let cmp = 0;
-                    if (tableName === 'runs') {
+                    if (tableName === 'runs' || tableName === 'imports') {
                         if (state.key === 'createdAt') cmp = compareNullableNumbers(toTs(ra.createdAt), toTs(rb.createdAt));
                         else if (['analysisMs', 'filesProcessed', 'bytesProcessed', 'rowsTotal'].includes(state.key)) cmp = compareNullableNumbers(ra[state.key], rb[state.key]);
                         else cmp = compareNullableStrings(ra[state.key], rb[state.key]);
@@ -2860,6 +2895,9 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                     if (table === 'runs' && key === runsSortState.key) {
                         btn.classList.add('active');
                         symbol = runsSortState.dir === 'asc' ? '↑' : '↓';
+                    } else if (table === 'imports' && key === importSortState.key) {
+                        btn.classList.add('active');
+                        symbol = importSortState.dir === 'asc' ? '↑' : '↓';
                     } else if (table === 'proc' && key === procSortState.key) {
                         btn.classList.add('active');
                         symbol = procSortState.dir === 'asc' ? '↑' : '↓';
@@ -2893,16 +2931,24 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                 ].join(' ').toLowerCase();
             }
 
+            function isImportEntry(entry) {
+                const source = String(entry && entry.sourceApi ? entry.sourceApi : '').toLowerCase();
+                return source.startsWith('autotune_import');
+            }
+
             function applyFilters() {
                 const rangeStart = computeRangeStart(currentRange);
                 const q = currentSearch.trim().toLowerCase();
 
-                filtered = allEntries.filter((entry) => {
+                const scoped = allEntries.filter((entry) => {
                     const ts = toTs(entry.createdAt);
                     if (rangeStart > 0 && ts > 0 && ts < rangeStart) return false;
                     if (!q) return true;
                     return normalizeSearchText(entry).includes(q);
                 });
+
+                filtered = scoped.filter((entry) => !isImportEntry(entry));
+                filteredImports = scoped.filter((entry) => isImportEntry(entry));
             }
 
             function summarizeEntries(entries) {
@@ -3652,6 +3698,45 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                 count.textContent = fmtInt(sortedEntries.length) + ' rows (' + fmtInt(take) + ' shown)';
             }
 
+            function renderImportTable(entries) {
+                const body = document.getElementById('import-runs-body');
+                const count = document.getElementById('import-runs-count');
+                if (!body || !count) return;
+
+                if (!entries.length) {
+                    body.innerHTML = '<tr><td colspan="9" class="muted-note">No import runs matched current filters.</td></tr>';
+                    count.textContent = '0 rows';
+                    return;
+                }
+
+                const sortedEntries = sortRowsByState(entries, importSortState, 'imports');
+                const take = Math.min(sortedEntries.length, 300);
+                const rows = [];
+                for (let i = 0; i < take; i++) {
+                    const row = sortedEntries[i];
+                    const status = String(row.status || '').toLowerCase() === 'ok' ? 'ok' : 'error';
+                    const ts = toTs(row.createdAt);
+                    const dateLabel = ts > 0 ? new Date(ts).toLocaleString() : '-';
+                    const filesLabel = fmtInt(Number(row.filesProcessed || 0)) + '/' + fmtInt(Number(row.filesAttempted || 0));
+                    rows.push(
+                        '<tr>' +
+                        '<td>' + escapeHtml(dateLabel) + '</td>' +
+                        '<td><span class="pill ' + (status === 'ok' ? 'pill-ok' : 'pill-bad') + '">' + escapeHtml(status) + '</span></td>' +
+                        '<td>' + fmtMs(Number(row.analysisMs || 0)) + '</td>' +
+                        '<td>' + escapeHtml(filesLabel) + '</td>' +
+                        '<td>' + fmtMb(Number(row.bytesProcessed || 0)) + '</td>' +
+                        '<td>' + fmtInt(Number(row.rowsTotal || 0)) + '</td>' +
+                        '<td>' + escapeHtml(row.country || 'ZZ') + '</td>' +
+                        '<td>' + escapeHtml(row.language || 'unknown') + '</td>' +
+                        '<td>' + escapeHtml(row.sourceApi || '-') + '</td>' +
+                        '</tr>'
+                    );
+                }
+
+                body.innerHTML = rows.join('');
+                count.textContent = fmtInt(sortedEntries.length) + ' rows (' + fmtInt(take) + ' shown)';
+            }
+
             function buildInsights(stats) {
                 const list = [];
                 const total = Math.max(0, stats.totalRuns);
@@ -3883,6 +3968,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                 renderAdvancedSuite(stats);
                 renderInsights(stats);
                 renderTable(filtered);
+                renderImportTable(filteredImports);
                 persistViewState();
             }
 
@@ -3933,6 +4019,8 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                         currentSearch = '';
                         runsSortState.key = 'createdAt';
                         runsSortState.dir = 'desc';
+                        importSortState.key = 'createdAt';
+                        importSortState.dir = 'desc';
                         procSortState.key = 'cpuPct';
                         procSortState.dir = 'desc';
                         visibleRunColumns = new Set(runColumnKeys);
@@ -3969,7 +4057,9 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                         const table = String(btn.dataset.table || '');
                         const key = String(btn.dataset.key || '');
                         if (!table || !key) return;
-                        const state = table === 'proc' ? procSortState : runsSortState;
+                        let state = runsSortState;
+                        if (table === 'proc') state = procSortState;
+                        else if (table === 'imports') state = importSortState;
                         if (state.key === key) {
                             state.dir = state.dir === 'asc' ? 'desc' : 'asc';
                         } else {
@@ -3979,6 +4069,8 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                         updateSortIndicators();
                         if (table === 'proc') {
                             renderProcesses(lastProcessRows);
+                        } else if (table === 'imports') {
+                            renderImportTable(filteredImports);
                         } else {
                             renderTable(filtered);
                         }

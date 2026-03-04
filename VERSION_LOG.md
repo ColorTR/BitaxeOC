@@ -265,3 +265,4 @@
 - v324: The `/r/<token>` boot flow was made deterministic as `share-first (silent) -> import`, preventing false "import not found" errors on share links; import-loaded datasets now trigger the Data Quality auto-close countdown again.
 - v325: Sharing URL output was standardized to a single format ` /i?share=<token> `, the legacy `/r/<token>` alias flow was removed from frontend boot parsing, and import links were switched to `/import/<id>` in the autotune import API response.
 - v326: Rate-limit responses were enhanced with a computed `Retry-After` header for both file and DB transient-store paths, so clients can display remaining cooldown time reliably on 429 responses.
+- v327: Import telemetry was integrated into UsageLogger (`autotune_import_create` / `autotune_import_consume`) and Ops Panel gained a dedicated sortable "Recent Import Runs" table filtered with the same range/search scope as Recent Runs.
