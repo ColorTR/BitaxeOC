@@ -16,10 +16,15 @@ zip -r bitaxe-oc_v61_backend.zip bitaxe-oc
 1. Dosyalari sunucuda `/opt/oc` altina koy
 2. PM2 ile `php -S 127.0.0.1:3001 -t /opt/oc` calistir
 3. Nginx ile `oc.colortr.com` -> `127.0.0.1:3001` proxy et
+4. Nginx rewrite ekle:
+   - `/import/<id>` -> `/index.php?import=<id>`
+   - `/api/autotune/import` -> `/api/autotune/import.php`
+   - `/api/autotune/consume` -> `/api/autotune/consume.php`
 
 URL:
 
 - [https://oc.colortr.com](https://oc.colortr.com)
+- Import landing: [https://oc.colortr.com/import/<importId>](https://oc.colortr.com/import/example)
 
 ## 3) PHP surumu
 
@@ -110,3 +115,35 @@ cd /Users/colortr/Downloads/aaa_fork/bitaxe-oc
 ```
 
 Script raporu PASS/FAIL olarak terminale yazar.
+
+## 10) Dinamik Ev IP + Sabit Ofis IP Whitelist (Fail2ban + UFW)
+
+IP ban'a takilmamak icin sunucuda whitelist'i tek komutla guncelle:
+
+```bash
+cd /Users/colortr/Downloads/aaa_fork/bitaxe-oc
+BITAXE_VPS_PASS='VPS_ROOT_SIFRE' ./scripts/refresh-vps-whitelist.sh
+```
+
+Varsayilanlar:
+- Ofis sabit IP: `93.114.167.23`
+- Ev IP: komut calisirken otomatik tespit edilir (degisirse eskisi overwrite edilir, birikmez)
+- VPS: `root@138.124.93.59`
+- Ev IP degismemisse script `skip` edip hicbir degisiklik yapmaz
+
+Opsiyonel override:
+
+```bash
+BITAXE_VPS_PASS='***' \
+BITAXE_VPS_HOST='138.124.93.59' \
+BITAXE_VPS_USER='root' \
+BITAXE_OFFICE_IP='93.114.167.23' \
+BITAXE_HOME_IP='x.x.x.x' \
+./scripts/refresh-vps-whitelist.sh
+```
+
+Ne gunceller:
+- `/etc/fail2ban/jail.local` `[DEFAULT]` ve aktif tum jail section'larina `ignoreip` uygular
+- UFW'de whitelist IP'lere ait eski kurallari temizleyip global `allow in from <ip> to any` kurali ekler
+- `bitaxe.colortr.com` icin `/etc/nginx/conf.d/bitaxe-security.conf` whitelist map'ini office+home IP ile yeniler ve nginx reload yapar
+- Onceki ev IP kaydini tek dosyada tutar: `/etc/bitaxe-whitelist/whitelist_home_ip.txt`

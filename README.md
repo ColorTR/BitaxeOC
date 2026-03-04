@@ -5,8 +5,13 @@ Bu paket tek HTML mimarisini backend destekli yapiya tasir:
 - Frontend: `/index.php` + `/assets/*`
 - Backend API: `/api/analyze.php`
 - Share API: `/api/share.php` (POST=create, GET=read)
+- Autotune Import API:
+  - `/api/autotune/import.php` (POST=create importId, OPTIONS=preflight)
+  - `/api/autotune/consume.php` (GET/POST=consume importId, one-time)
+  - `/import/<importId>` (auto-import landing route)
 - Core analiz mantigi: `/app/Analyzer.php` (tarayiciya acik degil)
 - Share depolama/limit: `/app/ShareStore.php` (`file` veya `db` backend)
+- Autotune import depolama/limit: `/app/AutotuneImportStore.php` (`file` veya `db` backend)
 - Upload loglama: `/app/UsageLogger.php`
 - Gizli admin panel: `/ops-panel.php`
 - Guvenlik: CSRF, replay korumasi (timestamp+nonce), same-origin kontrolu, rate limit, upload limitleri, `.htaccess` hardening
@@ -102,7 +107,9 @@ Env override (onerilen, source icine secret koymadan):
 - `BITAXE_CONFIG_FILE` (harici PHP config dosyasi; app dizini disinda tutulabilir)
 - `BITAXE_DB_*` (global DB ayarlari: `ENGINE/HOST/PORT/NAME/USER/PASSWORD/DSN/CHARSET`)
 - `BITAXE_SHARING_DB_*`, `BITAXE_LOGGING_DB_*`, `BITAXE_SECURITY_DB_*` (servis-bazli DB override)
+- `BITAXE_IMPORT_DB_*` (autotune import DB override)
 - `BITAXE_SHARING_DRIVER`, `BITAXE_LOGGING_DRIVER`, `BITAXE_SECURITY_TRANSIENT_STORE`
+- `BITAXE_IMPORT_DRIVER`, `BITAXE_IMPORT_ALLOWED_ORIGINS`, `BITAXE_IMPORT_ALLOW_ANY_ORIGIN`
 - `BITAXE_LOG_VISITOR_SALT` / `BITAXE_VISITOR_SALT`
 - `BITAXE_ADMIN_USERNAME`, `BITAXE_ADMIN_PASSWORD_HASH`, `BITAXE_ADMIN_ACCESS_KEY`, `BITAXE_ADMIN_ALLOWED_IPS`
 

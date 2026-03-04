@@ -17,6 +17,8 @@ $csvParseTimeBudgetMs = (int)$viewContext['csvParseTimeBudgetMs'];
 $shareToken = (string)$viewContext['shareToken'];
 $isShareView = (bool)$viewContext['isShareView'];
 $isStaticTestShareView = (bool)$viewContext['isStaticTestShareView'];
+$importToken = (string)($viewContext['importToken'] ?? '');
+$isImportView = (bool)($viewContext['isImportView'] ?? false);
 $basePath = (string)$viewContext['basePath'];
 $appBaseUrl = (string)$viewContext['appBaseUrl'];
 $assetBasePath = (string)$viewContext['assetBasePath'];
@@ -626,14 +628,17 @@ $jsonJsFlags = JSON_HEX_TAG
         const CSV_PARSE_TIME_BUDGET_MS = <?= json_encode($csvParseTimeBudgetMs, $jsonJsFlags) ?>;
         const TABLE_RENDER_DEBOUNCE_MS = 50;
         const SAMPLE_CSV_PATH = pathWithBase('/assets/samples/bitaxe_demo_sample_v1.csv');
-        const SHARE_CREATE_API_PATH = 'api/share.php?action=create';
-        const SHARE_GET_API_PATH = 'api/share.php';
-        const USAGE_LOG_API_PATH = 'api/share.php?action=usage-log';
+        const SHARE_CREATE_API_PATH = pathWithBase('/api/share.php?action=create');
+        const SHARE_GET_API_PATH = pathWithBase('/api/share.php');
+        const IMPORT_CONSUME_API_PATH = pathWithBase('/api/autotune/consume.php');
+        const USAGE_LOG_API_PATH = pathWithBase('/api/share.php?action=usage-log');
         const USAGE_LOG_FETCH_TIMEOUT_MS = 8000;
         const SHARE_MAX_BODY_BYTES = 1200 * 1024;
         const SHARE_FETCH_TIMEOUT_MS = 15000;
         const SHARE_TOKEN_PATTERN = /^[a-f0-9]{16,80}$/;
+        const IMPORT_TOKEN_PATTERN = /^[a-f0-9]{16,80}$/;
         const SHARE_STATIC_TEST_TOKEN = 'test';
+        const IMPORT_TOKEN_FROM_SERVER = <?= json_encode($importToken, $jsonJsFlags) ?>;
         const SHARE_LAYOUT_ALLOWED_PANELS = ['stability', 'elite', 'aate', 'power', 'efficiency', 'temperature', 'frequency', 'vf-heatmap', 'table'];
         const CHART_STAGED_RENDER_ROW_THRESHOLD = 350;
         const CHART_PERF_MODE_ROW_THRESHOLD = 950;
@@ -1427,6 +1432,54 @@ $jsonJsFlags = JSON_HEX_TAG
             return SHARE_TOKEN_PATTERN.test(raw) ? raw : '';
         }
 
+        function getImportTokenFromUrl() {
+            const serverToken = String(IMPORT_TOKEN_FROM_SERVER || '').trim().toLowerCase();
+            if (serverToken && IMPORT_TOKEN_PATTERN.test(serverToken)) {
+                return serverToken;
+            }
+
+            const params = new URLSearchParams(window.location.search || '');
+            const queryToken = String(params.get('import') || params.get('i') || '').trim().toLowerCase();
+            if (queryToken && IMPORT_TOKEN_PATTERN.test(queryToken)) {
+                return queryToken;
+            }
+
+            const pathname = String(window.location.pathname || '');
+            const pathMatch = pathname.match(/\/import\/([a-f0-9]{16,80})\/?$/i);
+            if (!pathMatch) return '';
+            const token = String(pathMatch[1] || '').trim().toLowerCase();
+            return IMPORT_TOKEN_PATTERN.test(token) ? token : '';
+        }
+
+        function clearImportTokenFromUrl() {
+            try {
+                const url = new URL(window.location.href);
+                let changed = false;
+
+                if (url.searchParams.has('import')) {
+                    url.searchParams.delete('import');
+                    changed = true;
+                }
+                if (url.searchParams.has('i')) {
+                    url.searchParams.delete('i');
+                    changed = true;
+                }
+
+                const importPathMatch = String(url.pathname || '').match(/^(.*)\/import\/[a-f0-9]{16,80}\/?$/i);
+                if (importPathMatch) {
+                    let nextPath = String(importPathMatch[1] || '');
+                    nextPath = nextPath.replace(/\/+$/, '');
+                    url.pathname = nextPath ? `${nextPath}/` : '/';
+                    changed = true;
+                }
+
+                if (!changed) return;
+                window.history.replaceState({}, '', url.toString());
+            } catch (_) {
+                // no-op
+            }
+        }
+
         function buildSharePayload() {
             const selectedTheme = getCurrentThemeMode();
             const selectedThemeVariant = getCurrentThemeVariant();
@@ -1648,6 +1701,80 @@ $jsonJsFlags = JSON_HEX_TAG
             }
         }
 
+        async function loadAutotuneImportFromUrl(tokenCandidate = '') {
+            const token = String(tokenCandidate || getImportTokenFromUrl()).trim().toLowerCase();
+            if (!token || !IMPORT_TOKEN_PATTERN.test(token)) return false;
+
+            try {
+                const { response, payload } = await fetchJsonWithTimeout(
+                    `${IMPORT_CONSUME_API_PATH}?id=${encodeURIComponent(token)}`,
+                    {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    }
+                );
+
+                if (response.status === 404) {
+                    showInAppToast(t('alert.importNotFound'), 'error', 7000);
+                    return false;
+                }
+                if (response.status === 410) {
+                    const state = String(payload?.state || '').toLowerCase();
+                    if (state === 'consumed') {
+                        showInAppToast(t('alert.importConsumed'), 'warn', 7000);
+                    } else {
+                        showInAppToast(t('alert.importExpired'), 'warn', 7000);
+                    }
+                    return false;
+                }
+                if (!response.ok || !payload?.ok || !payload?.import?.csv) {
+                    throw new Error(String(payload?.error || 'import_load_failed'));
+                }
+
+                const importedPayload = payload.import;
+                const csvText = String(importedPayload.csv || '');
+                const parsed = parseCSV(csvText);
+                if (!Array.isArray(parsed.data) || parsed.data.length === 0) {
+                    throw new Error('import_payload_invalid');
+                }
+
+                const importedFilename = String(importedPayload.filename || 'autotune_report.csv').trim() || 'autotune_report.csv';
+                const importedRecord = buildFileRecordFromUpload({
+                    name: importedFilename,
+                    lastModified: Date.now()
+                }, parsed);
+                importedRecord.id = `autotune_import_${token}`;
+                importedRecord.isMaster = true;
+                importedRecord.enabled = true;
+
+                rawFilesData = [importedRecord];
+                consolidatedData = [];
+                visibleRows = DEFAULT_VISIBLE_ROWS;
+                pendingFileReads = 0;
+                appendUploadMode = false;
+                dataQualityPinnedByUser = false;
+                if (refs.fileInput) refs.fileInput.value = '';
+
+                applyFilterState({});
+                recomputeAndRender(true);
+                setShareReadOnlyMode(false);
+                activateDashboardView({ allowUpload: true });
+                syncControlVisibility();
+                clearImportTokenFromUrl();
+                showInAppToast(t('alert.importLoaded'), 'success', 4200);
+                return true;
+            } catch (error) {
+                const message = String(error?.message || '').trim();
+                if (message && !['import_load_failed', 'import_payload_invalid'].includes(message)) {
+                    showInAppToast(message, 'error', 7000);
+                } else {
+                    showInAppToast(t('alert.importLoadFailed'), 'error', 7000);
+                }
+                return false;
+            }
+        }
+
         // Detect whether a click was made outside upload modal bounds (+optional margin).
         function isOverlayClickFarOutsideModal(event, modalEl, marginRatio = UPLOAD_OUTSIDE_CLOSE_MARGIN_RATIO) {
             if (!event || !modalEl) return false;
@@ -1827,6 +1954,11 @@ $jsonJsFlags = JSON_HEX_TAG
                 'alert.shareCopyFallback': 'Panoya kopyalama başarısız oldu. Bağlantıyı elle kopyalayın: {url}',
                 'alert.shareNotFound': 'Paylaşım bağlantısı bulunamadı veya süresi doldu.',
                 'alert.shareLoadFailed': 'Paylaşım raporu yüklenemedi.',
+                'alert.importNotFound': 'Import kaydı bulunamadı.',
+                'alert.importExpired': 'Import kaydının süresi dolmuş.',
+                'alert.importConsumed': 'Import kaydı daha önce kullanılmış.',
+                'alert.importLoadFailed': 'Autotune import verisi yüklenemedi.',
+                'alert.importLoaded': 'Autotune verisi yüklendi, analiz başlatıldı.',
                 'alert.shareNeedsUserCsv': 'Paylaşım için önce kendi CSV dosyanızı yükleyip analiz edin.',
                 'alert.shareReadOnly': 'Paylaşılan bağlantı görünümünde tekrar paylaşım kapalıdır.',
                 'share.modal.title': 'Paylaşım Linki Hazır',
@@ -1996,6 +2128,11 @@ $jsonJsFlags = JSON_HEX_TAG
                 'alert.shareCopyFallback': 'Clipboard copy failed. Copy this link manually: {url}',
                 'alert.shareNotFound': 'Share link was not found or has expired.',
                 'alert.shareLoadFailed': 'Shared report could not be loaded.',
+                'alert.importNotFound': 'Import record was not found.',
+                'alert.importExpired': 'Import record has expired.',
+                'alert.importConsumed': 'Import record was already consumed.',
+                'alert.importLoadFailed': 'Autotune import data could not be loaded.',
+                'alert.importLoaded': 'Autotune data loaded and analysis started.',
                 'alert.shareNeedsUserCsv': 'Upload your own CSV files and run analysis before sharing.',
                 'alert.shareReadOnly': 'Re-sharing is disabled on shared-link view.',
                 'share.modal.title': 'Share Link Ready',
@@ -5605,7 +5742,9 @@ $jsonJsFlags = JSON_HEX_TAG
             const hasSampleOnlyData = hasData && isSampleOnlyProject();
             const uploadLocked = IS_SNAPSHOT_VIEW || isReadOnlyShareView;
             const canShare = hasData && !IS_EMBEDDED_STATE && !isReadOnlyShareView && (hasUserFiles || hasSampleOnlyData);
-            const showSamplePreview = isUploadOverlayVisible() && !hasUserFiles && !hasData && !uploadLocked;
+            // Keep sample preview action reachable whenever upload overlay is open.
+            // Users may want to compare their current dataset against sample data.
+            const showSamplePreview = isUploadOverlayVisible() && !uploadLocked;
             setSamplePreviewVisibility(showSamplePreview);
             updateUploadProcessLabel();
             setHidden(refs.showUploadBtn, !hasFiles || uploadLocked);
@@ -5649,7 +5788,7 @@ $jsonJsFlags = JSON_HEX_TAG
             refs.uploadSection.style.display = 'none';
             refs.dashboardContent.classList.remove('opacity-30', 'blur-sm');
             refs.dashboardContent.classList.add('opacity-100', 'blur-0');
-            setSamplePreviewVisibility(false);
+            setSamplePreviewVisibility(!IS_SNAPSHOT_VIEW && !isReadOnlyShareView);
             if (refs.closeUploadBtn) refs.closeUploadBtn.classList.add('hidden');
             if (allowUpload && !IS_SNAPSHOT_VIEW && !isReadOnlyShareView && rawFilesData.length > 0) setHidden(refs.showUploadBtn, false);
             else setHidden(refs.showUploadBtn, true);
@@ -6927,8 +7066,9 @@ $jsonJsFlags = JSON_HEX_TAG
             renderDataQualitySummary(false);
             refreshFilterControlsFromData();
             syncControlVisibility();
+            const requestedImportToken = getImportTokenFromUrl();
             const requestedShareToken = getShareTokenFromUrl();
-            if (requestedShareToken) {
+            if (requestedImportToken || requestedShareToken) {
                 setUploadOverlayShareLoadingHidden(true);
                 if (refs.uploadSection) {
                     refs.uploadSection.classList.remove('slide-up-hidden');
@@ -6951,8 +7091,11 @@ $jsonJsFlags = JSON_HEX_TAG
                 }
             }
 
+            const importedLoaded = await loadAutotuneImportFromUrl(requestedImportToken);
+            if (importedLoaded) return;
             const sharedLoaded = await loadSharedReportFromUrl(requestedShareToken);
             if (sharedLoaded) return;
+            if (requestedImportToken) setShareReadOnlyMode(false);
             if (requestedShareToken) setShareReadOnlyMode(false);
             showInitialUploadView();
         }

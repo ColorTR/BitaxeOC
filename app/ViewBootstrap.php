@@ -26,8 +26,16 @@ final class ViewBootstrap
         $csvParseTimeBudgetMs = max(500, (int)($limitsConfig['csv_parse_time_budget_ms'] ?? 8000));
 
         $shareToken = strtolower(trim((string)($query['share'] ?? ($query['s'] ?? ''))));
+        if ($shareToken !== '' && $shareToken !== 'test' && preg_match('/^[a-f0-9]{16,80}$/', $shareToken) !== 1) {
+            $shareToken = '';
+        }
         $isShareView = $shareToken !== '';
         $isStaticTestShareView = ($shareToken === 'test');
+        $importToken = strtolower(trim((string)($query['import'] ?? ($query['i'] ?? ''))));
+        if ($importToken !== '' && preg_match('/^[a-f0-9]{16,80}$/', $importToken) !== 1) {
+            $importToken = '';
+        }
+        $isImportView = $importToken !== '';
 
         $scriptName = str_replace('\\', '/', (string)($server['SCRIPT_NAME'] ?? '/index.php'));
         $scriptDir = rtrim(dirname($scriptName), '/');
@@ -78,6 +86,8 @@ final class ViewBootstrap
             'shareToken' => $shareToken,
             'isShareView' => $isShareView,
             'isStaticTestShareView' => $isStaticTestShareView,
+            'importToken' => $importToken,
+            'isImportView' => $isImportView,
             'basePath' => $basePath,
             'appBaseUrl' => $appBaseUrl,
             'assetBasePath' => $assetBasePath,
@@ -85,7 +95,7 @@ final class ViewBootstrap
             'seoTitle' => 'Bitaxe & NerdAxe OC Stats Analyzer | Lottery Mining Dashboard',
             'seoDescription' => 'Analyze Bitaxe and NerdAxe lottery mining OC stats from CSV benchmarks. Compare hashrate, efficiency (J/TH), ASIC and VRM temperatures, error rate, and power to find stable overclock profiles.',
             'seoKeywords' => 'Bitaxe, NerdAxe, lottery mining, OC stats, overclock, hashrate, JTH, J/TH, ASIC miner tuning, benchmark dashboard, GT800',
-            'seoRobots' => ($isShareView && !$isStaticTestShareView)
+            'seoRobots' => (($isShareView && !$isStaticTestShareView) || $isImportView)
                 ? 'noindex,nofollow,noarchive'
                 : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
             'tailwindMode' => $tailwindMode,

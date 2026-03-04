@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 $config = [
-    'app_version' => 'v309',
+    'app_version' => 'v318',
     'frontend' => [
         // runtime: keep Tailwind runtime script (safe default)
         // static: use prebuilt CSS if available at frontend.tailwind_static_css
@@ -68,6 +68,60 @@ $config = [
         'create_rate_limit_window_sec' => 300,
         'view_rate_limit_requests' => 240,
         'view_rate_limit_window_sec' => 300,
+    ],
+    'autotune_import' => [
+        'enabled' => true,
+        // `db` (recommended) or `file`.
+        'driver' => 'db',
+        // If db mode fails, continue with file backend.
+        'file_fallback_read' => true,
+        'storage_dir' => 'storage/import_tickets',
+        'id_bytes' => 12,
+        // Keep tickets short-lived by default.
+        'default_ttl_sec' => 600,
+        'max_ttl_sec' => 3600,
+        'max_csv_bytes' => 2 * 1024 * 1024,
+        'max_filename_bytes' => 180,
+        'max_source_bytes' => 48,
+        // Keep request parser bounded (CSV + protocol overhead).
+        'max_request_bytes' => (2 * 1024 * 1024) + (256 * 1024),
+        'consume_request_max_bytes' => 32 * 1024,
+        // CORS policy for browser-side AxeOS -> OC import.
+        'allow_any_origin' => false,
+        // Exact allowed origins (case-insensitive compare after normalization).
+        'allowed_origins' => [
+            'https://bitaxe.colortr.com',
+            'http://bitaxe.colortr.com',
+        ],
+        // Convenience toggles for local/private deployments.
+        'allow_bitaxe_origin' => true,
+        'allow_localhost_origins' => true,
+        'allow_private_lan_origins' => true,
+        // If request has no Origin header (curl/server-side), allow it.
+        'allow_no_origin_requests' => true,
+        'cors_max_age_sec' => 600,
+        'create_rate_limit_requests' => 30,
+        'create_rate_limit_window_sec' => 300,
+        'consume_rate_limit_requests' => 180,
+        'consume_rate_limit_window_sec' => 300,
+        // File backend GC probability
+        'file_prune_probability' => 5,
+        // DB backend options
+        'db' => [
+            'engine' => 'mysql',
+            'host' => 'localhost',
+            'port' => 3306,
+            'database' => '',
+            'username' => '',
+            'password' => '',
+            'allow_empty_password' => false,
+            'table' => 'autotune_import_tickets',
+            'dsn' => '',
+            'charset' => 'utf8mb4',
+            // Probabilistic prune on write.
+            'prune_probability' => 5,
+            'prune_batch_size' => 2000,
+        ],
     ],
     'logging' => [
         'enabled' => true,
@@ -365,6 +419,9 @@ if ($externalConfigPath !== null && $externalConfigPath !== '') {
 if (!is_array($config['sharing'] ?? null)) {
     $config['sharing'] = [];
 }
+if (!is_array($config['autotune_import'] ?? null)) {
+    $config['autotune_import'] = [];
+}
 if (!is_array($config['logging'] ?? null)) {
     $config['logging'] = [];
 }
@@ -380,6 +437,9 @@ if (!is_array($config['server'] ?? null)) {
 
 if (!is_array($config['sharing']['db'] ?? null)) {
     $config['sharing']['db'] = [];
+}
+if (!is_array($config['autotune_import']['db'] ?? null)) {
+    $config['autotune_import']['db'] = [];
 }
 if (!is_array($config['logging']['db'] ?? null)) {
     $config['logging']['db'] = [];
@@ -400,10 +460,13 @@ if (!is_array($config['security']['trusted_proxies'] ?? null)) {
 }
 
 $applyDbEnv($config['sharing']['db'], 'BITAXE_');
+$applyDbEnv($config['autotune_import']['db'], 'BITAXE_');
 $applyDbEnv($config['logging']['db'], 'BITAXE_');
 $applyDbEnv($config['security']['db'], 'BITAXE_');
 
 $applyDbEnv($config['sharing']['db'], 'BITAXE_SHARING_');
+$applyDbEnv($config['autotune_import']['db'], 'BITAXE_IMPORT_');
+$applyDbEnv($config['autotune_import']['db'], 'BITAXE_AUTOTUNE_IMPORT_');
 $applyDbEnv($config['logging']['db'], 'BITAXE_LOGGING_');
 $applyDbEnv($config['security']['db'], 'BITAXE_SECURITY_');
 
@@ -415,6 +478,23 @@ if ($sharingDriver !== null && $sharingDriver !== '') {
 $loggingDriver = $envString('BITAXE_LOGGING_DRIVER');
 if ($loggingDriver !== null && $loggingDriver !== '') {
     $config['logging']['driver'] = strtolower($loggingDriver);
+}
+
+$importDriver = $envString('BITAXE_IMPORT_DRIVER');
+if ($importDriver !== null && $importDriver !== '') {
+    $config['autotune_import']['driver'] = strtolower($importDriver);
+}
+
+$importAllowAnyOrigin = $envBool('BITAXE_IMPORT_ALLOW_ANY_ORIGIN');
+if ($importAllowAnyOrigin !== null) {
+    $config['autotune_import']['allow_any_origin'] = $importAllowAnyOrigin;
+}
+
+$importAllowedOrigins = $envString('BITAXE_IMPORT_ALLOWED_ORIGINS');
+if ($importAllowedOrigins !== null) {
+    $config['autotune_import']['allowed_origins'] = array_values(array_filter(array_map('trim', explode(',', $importAllowedOrigins)), static function (string $entry): bool {
+        return $entry !== '';
+    }));
 }
 
 $transientStore = $envString('BITAXE_SECURITY_TRANSIENT_STORE');
@@ -476,6 +556,10 @@ if (($config['sharing']['driver'] ?? '') === 'db' && !$dbIsConfigured($config['s
 
 if (($config['logging']['driver'] ?? '') === 'db' && !$dbIsConfigured($config['logging']['db'])) {
     $config['logging']['driver'] = 'file';
+}
+
+if (($config['autotune_import']['driver'] ?? '') === 'db' && !$dbIsConfigured($config['autotune_import']['db'])) {
+    $config['autotune_import']['driver'] = 'file';
 }
 
 if (($config['security']['transient_store'] ?? '') === 'db' && !$dbIsConfigured($config['security']['db'])) {

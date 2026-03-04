@@ -1,0 +1,14 @@
+<Files "import.php">
+    Require all granted
+    <LimitExcept POST OPTIONS>
+        Require all denied
+    </LimitExcept>
+</Files>
+
+<Files "consume.php">
+    Require all granted
+    <LimitExcept GET POST>
+        Require all denied
+    </LimitExcept>
+</Files>
+

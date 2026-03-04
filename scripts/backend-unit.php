@@ -120,11 +120,15 @@ $run('View bootstrap canonical + robots', static function (): string {
     if (($ctxMain['seoRobots'] ?? '') === 'noindex,nofollow,noarchive') {
         throw new RuntimeException('main should be indexable');
     }
-    $ctxShare = ViewBootstrap::forIndex($cfg, $server, ['share' => 'abc123']);
+    $ctxShare = ViewBootstrap::forIndex($cfg, $server, ['share' => str_repeat('a', 16)]);
     if (($ctxShare['seoRobots'] ?? '') !== 'noindex,nofollow,noarchive') {
         throw new RuntimeException('share robots mismatch');
     }
-    return 'main/share robots ok';
+    $ctxImport = ViewBootstrap::forIndex($cfg, $server, ['import' => str_repeat('b', 16)]);
+    if (($ctxImport['seoRobots'] ?? '') !== 'noindex,nofollow,noarchive') {
+        throw new RuntimeException('import robots mismatch');
+    }
+    return 'main/share/import robots ok';
 });
 
 $run('Api bootstrap client context identity', static function (): string {

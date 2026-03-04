@@ -1,8 +1,8 @@
-MASTER_BACKEND_VERSION=v308
-MASTER_BACKEND_FILE=bitaxe-oc_master_backend_v308.zip
-MASTER_BACKEND_PATH=/Users/colortr/Downloads/aaa_fork/bitaxe-oc/zip_backups/bitaxe-oc_master_backend_v308.zip
-MASTER_BACKEND_SHA256=376c3aa59123ae255dcfe656ec7eff039a7c2e1383053208b813ec3d0dd078d6
-MASTER_BACKEND_SIZE_BYTES=1515727
-MASTER_SET_AT_UTC=2026-03-01T02:47:18Z
-REMOTE_MASTER_BACKUP_DIR=/opt/oc/.oc_master_backups/v308_20260301T025753Z
+MASTER_BACKEND_VERSION=v318
+MASTER_BACKEND_FILE=bitaxe-oc_master_backend_v318.zip
+MASTER_BACKEND_PATH=/Users/colortr/Downloads/aaa_fork/bitaxe-oc/zip_backups/bitaxe-oc_master_backend_v318.zip
+MASTER_BACKEND_SHA256=636febc4d64f17d35c0eab7082fd4ad7443392efdd336fcff1b3d76d52db529a
+MASTER_BACKEND_SIZE_BYTES=1531511
+MASTER_SET_AT_UTC=2026-03-04T02:14:18Z
+REMOTE_MASTER_BACKUP_DIR=/opt/oc/.oc_master_backups/v318_20260304T021402Z
 REMOTE_SITE_URL=https://oc.colortr.com

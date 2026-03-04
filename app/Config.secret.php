@@ -24,6 +24,22 @@ $resolveDbPassword = static function (string $specificEnvKey) use ($sharedDbPass
 };
 
 return [
+    'autotune_import' => [
+        'driver' => 'db',
+        'file_fallback_read' => true,
+        'db' => [
+            'engine' => getenv('BITAXE_IMPORT_DB_ENGINE') ?: (getenv('BITAXE_DB_ENGINE') ?: 'mysql'),
+            'host' => getenv('BITAXE_IMPORT_DB_HOST') ?: (getenv('BITAXE_DB_HOST') ?: 'localhost'),
+            'port' => (int)(getenv('BITAXE_IMPORT_DB_PORT') ?: (getenv('BITAXE_DB_PORT') ?: 3306)),
+            'database' => getenv('BITAXE_IMPORT_DB_NAME') ?: (getenv('BITAXE_DB_NAME') ?: 'oc_masterdata'),
+            'username' => getenv('BITAXE_IMPORT_DB_USER') ?: (getenv('BITAXE_DB_USER') ?: 'oc_app'),
+            // Priority: specific env -> common env -> local secret file (app/.db_password).
+            'password' => $resolveDbPassword('BITAXE_IMPORT_DB_PASSWORD'),
+            'table' => 'autotune_import_tickets',
+            'prune_probability' => 5,
+            'prune_batch_size' => 2000,
+        ],
+    ],
     'sharing' => [
         'driver' => 'db',
         'file_fallback_read' => true,

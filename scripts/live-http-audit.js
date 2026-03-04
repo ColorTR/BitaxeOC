@@ -845,6 +845,141 @@ async function run() {
     return `${res.status} ${cacheControl} (${ms}ms)`;
   });
 
+  await runTest('API: autotune import OPTIONS preflight allows trusted origin', async () => {
+    const { res } = await fetchWithTiming(`${baseOrigin}/api/autotune/import.php`, {
+      method: 'OPTIONS',
+      redirect: 'follow',
+      headers: {
+        Origin: 'https://bitaxe.colortr.com',
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'content-type',
+        'User-Agent': apiUserAgent('autotune-options')
+      }
+    });
+    const allowOrigin = String(res.headers.get('access-control-allow-origin') || '').toLowerCase();
+    assert(res.status === 204, `Expected 204, got ${res.status}`);
+    assert(allowOrigin === 'https://bitaxe.colortr.com', `Unexpected ACAO: ${allowOrigin}`);
+    return `status=${res.status} allow-origin=${allowOrigin}`;
+  });
+
+  await runTest('API security: autotune import POST blocks untrusted origin', async () => {
+    const req = {
+      type: 'autotune_csv_import',
+      source: 'axeos',
+      filename: 'autotune_report.csv',
+      csv: 'voltage,frequency,hashrate\n1270,832,3426'
+    };
+    const resp = await getJson(`${baseOrigin}/api/autotune/import.php`, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'https://evil.example',
+        'X-Requested-With': 'XMLHttpRequest',
+        'User-Agent': apiUserAgent('autotune-wrong-origin')
+      },
+      body: JSON.stringify(req)
+    });
+    assert(resp.res.status === 403, `Expected 403, got ${resp.res.status}`);
+    return `status=${resp.res.status}`;
+  });
+
+  await runTest('API flow: autotune import create + consume + one-time lock', async () => {
+    const csvBody = [
+      'voltage,frequency,hashrate,temp,vrTemp,errorRate,efficiency,power',
+      '1270,832,3426,60,70,0.46,16.11,55.2',
+      '1380,1088,4523,62,73,0.63,18.78,84.9'
+    ].join('\n');
+
+    const create = await getJson(`${baseOrigin}/api/autotune/import.php`, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: baseOrigin,
+        'X-Requested-With': 'XMLHttpRequest',
+        'User-Agent': apiUserAgent('autotune-create')
+      },
+      body: JSON.stringify({
+        type: 'autotune_csv_import',
+        source: 'axeos',
+        filename: 'autotune_report.csv',
+        csv: csvBody,
+        timestamp: Math.floor(Date.now() / 1000)
+      })
+    });
+
+    assert(create.res.status === 201, `Expected 201, got ${create.res.status}`);
+    assert(create.data && create.data.ok === true, `Expected ok=true, got: ${short(create.data)}`);
+    const importId = String(create.data?.import?.id || '').trim();
+    assert(/^[a-f0-9]{16,80}$/i.test(importId), `Invalid import id: ${importId}`);
+
+    const consumeUrl = `${baseOrigin}/api/autotune/consume.php?id=${encodeURIComponent(importId)}`;
+    const consume = await getJson(consumeUrl, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: { 'User-Agent': apiUserAgent('autotune-consume-1') }
+    });
+    assert(consume.res.status === 200, `Expected first consume 200, got ${consume.res.status}`);
+    assert(consume.data && consume.data.ok === true, `First consume expected ok=true, got: ${short(consume.data)}`);
+    const consumedCsv = String(consume.data?.import?.csv || '');
+    assert(consumedCsv.includes('voltage,frequency,hashrate'), 'Consumed CSV payload mismatch');
+
+    const second = await getJson(consumeUrl, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: { 'User-Agent': apiUserAgent('autotune-consume-2') }
+    });
+    assert(second.res.status === 410, `Expected second consume 410, got ${second.res.status}`);
+    return `id=${importId.slice(0, 12)}... first=${consume.res.status} second=${second.res.status}`;
+  });
+
+  await runTest('Import route: frontend API paths stay absolute under /import/<id>', async () => {
+    const csvBody = [
+      'voltage,frequency,hashrate,temp,vrTemp,errorRate,efficiency,power',
+      '1270,832,3426,60,70,0.46,16.11,55.2'
+    ].join('\n');
+
+    const create = await getJson(`${baseOrigin}/api/autotune/import.php`, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: baseOrigin,
+        'X-Requested-With': 'XMLHttpRequest',
+        'User-Agent': apiUserAgent('autotune-import-route')
+      },
+      body: JSON.stringify({
+        type: 'autotune_csv_import',
+        source: 'axeos',
+        filename: 'autotune_report.csv',
+        csv: csvBody,
+        timestamp: Math.floor(Date.now() / 1000)
+      })
+    });
+
+    assert(create.res.status === 201, `Expected 201, got ${create.res.status}`);
+    const importPath = String(create.data?.import?.importPath || '').trim();
+    assert(importPath.startsWith('/import/'), `Invalid importPath: ${importPath}`);
+
+    const importPage = await fetchWithTiming(`${baseOrigin}${importPath}`, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: { 'User-Agent': apiUserAgent('autotune-import-page') }
+    });
+    assert(importPage.res.status === 200, `Import page status not 200: ${importPage.res.status}`);
+    const html = await importPage.res.text();
+    assert(
+      html.includes("const IMPORT_CONSUME_API_PATH = pathWithBase('/api/autotune/consume.php');"),
+      'IMPORT_CONSUME_API_PATH is not absolute'
+    );
+    assert(
+      html.includes("const SHARE_GET_API_PATH = pathWithBase('/api/share.php');"),
+      'SHARE_GET_API_PATH is not absolute'
+    );
+    return importPath;
+  });
+
   await runTest('Frontend assets: local tailwind asset is referenced', async () => {
     const scriptSrc = findScriptSrc(indexHtml, '/assets/vendor/tailwindcss-cdn.js');
     const staticCssHref = findLinkHrefByFragment(indexHtml, '/assets/vendor/tailwind-static.css');
