@@ -75,6 +75,9 @@ is_ipv4() {
 is_ipv4 "$OFFICE_IP" || { echo "[error] OFFICE_IP gecersiz: $OFFICE_IP"; exit 1; }
 is_ipv4 "$HOME_IP" || { echo "[error] HOME_IP gecersiz: $HOME_IP"; exit 1; }
 
+OFFICE_IP_RE="${OFFICE_IP//./\\.}"
+HOME_IP_RE="${HOME_IP//./\\.}"
+
 STATE_DIR="/etc/bitaxe-whitelist"
 STATE_FILE="${STATE_DIR}/whitelist_home_ip.txt"
 mkdir -p "$STATE_DIR"
@@ -206,10 +209,16 @@ cat > /etc/nginx/conf.d/bitaxe-security.conf <<NGINX
 # Bitaxe endpoint rate limiting with whitelist relaxed profile
 # Office IP: ${OFFICE_IP}
 # Home IP: ${HOME_IP}
-map \$remote_addr \$bitaxe_req_key_default {
+
+# Auth request flow note:
+# Some bitaxe endpoints use auth_request sub-calls. If login/check endpoints are rate-limited
+# and return 429, upstream may surface this as 500. Keep GET/HEAD auth checks out of req limits.
+map "\$remote_addr:\$request_method:\$uri" \$bitaxe_req_key_default {
     default \$binary_remote_addr;
-    ${OFFICE_IP} "";
-    ${HOME_IP} "";
+    ~^${OFFICE_IP_RE}: "";
+    ~^${HOME_IP_RE}: "";
+    ~^.+:(GET|HEAD):/auth/login\$ "";
+    ~^.+:(GET|HEAD):/auth/(check|status|session|validate|probe)\$ "";
 }
 map \$remote_addr \$bitaxe_req_key_office {
     default "";
