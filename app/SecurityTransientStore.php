@@ -188,6 +188,8 @@ final class SecurityTransientStore
             }
 
             if (count($timestamps) >= $limit) {
+                $retryAfterSec = self::calculateRetryAfterFromTimestamps($timestamps, $windowSec, $now);
+                self::setRetryAfterHeader($retryAfterSec);
                 throw new HttpException('Cok fazla istek. Lutfen biraz sonra tekrar deneyin.', 429);
             }
 
@@ -348,6 +350,20 @@ final class SecurityTransientStore
         ]);
         $hitCount = (int)$countStmt->fetchColumn();
         if ($hitCount >= $limit) {
+            $retryAfterSec = max(1, $windowSec);
+            $oldestStmt = $pdo->prepare(
+                "SELECT MIN(created_ts) FROM {$tableSql} WHERE scope_name = :scope_name AND identity_hash = :identity_hash AND event_type = 'rl' AND created_ts > :window_start"
+            );
+            $oldestStmt->execute([
+                ':scope_name' => $scopeName,
+                ':identity_hash' => $identityHash,
+                ':window_start' => $windowStart,
+            ]);
+            $oldestTs = (int)$oldestStmt->fetchColumn();
+            if ($oldestTs > 0) {
+                $retryAfterSec = max(1, ($oldestTs + $windowSec) - $now);
+            }
+            self::setRetryAfterHeader($retryAfterSec);
             throw new HttpException('Cok fazla istek. Lutfen biraz sonra tekrar deneyin.', 429);
         }
 
@@ -499,5 +515,30 @@ final class SecurityTransientStore
         }
         $driverCode = (string)($error->errorInfo[1] ?? '');
         return in_array($driverCode, ['1062', '1555', '2067'], true);
+    }
+
+    /**
+     * @param list<int> $timestamps
+     */
+    private static function calculateRetryAfterFromTimestamps(array $timestamps, int $windowSec, int $now): int
+    {
+        if ($timestamps === []) {
+            return max(1, $windowSec);
+        }
+        sort($timestamps, SORT_NUMERIC);
+        $oldestTs = (int)$timestamps[0];
+        if ($oldestTs <= 0) {
+            return max(1, $windowSec);
+        }
+        return max(1, ($oldestTs + $windowSec) - $now);
+    }
+
+    private static function setRetryAfterHeader(int $seconds): void
+    {
+        if (headers_sent()) {
+            return;
+        }
+        $safeSeconds = max(1, $seconds);
+        header('Retry-After: ' . $safeSeconds);
     }
 }
