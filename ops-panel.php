@@ -2459,7 +2459,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                                         <label><input type="checkbox" data-col-toggle="status" checked> Status</label>
                                         <label><input type="checkbox" data-col-toggle="analysisMs" checked> Analysis</label>
                                         <label><input type="checkbox" data-col-toggle="filesProcessed" checked> Files</label>
-                                        <label><input type="checkbox" data-col-toggle="bytesProcessed" checked> Processed MB</label>
+                                        <label><input type="checkbox" data-col-toggle="bytesProcessed" checked> Processed Size</label>
                                         <label><input type="checkbox" data-col-toggle="rowsTotal" checked> Rows</label>
                                         <label><input type="checkbox" data-col-toggle="country" checked> Country</label>
                                         <label><input type="checkbox" data-col-toggle="language" checked> Lang</label>
@@ -2478,7 +2478,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                                     <th data-col="status"><button class="th-sort" data-table="runs" data-key="status" type="button">Status <span class="sort-indicator"></span></button></th>
                                     <th data-col="analysisMs"><button class="th-sort" data-table="runs" data-key="analysisMs" type="button">Analysis <span class="sort-indicator"></span></button></th>
                                     <th data-col="filesProcessed"><button class="th-sort" data-table="runs" data-key="filesProcessed" type="button">Files <span class="sort-indicator"></span></button></th>
-                                    <th data-col="bytesProcessed"><button class="th-sort" data-table="runs" data-key="bytesProcessed" type="button">Processed MB <span class="sort-indicator"></span></button></th>
+                                    <th data-col="bytesProcessed"><button class="th-sort" data-table="runs" data-key="bytesProcessed" type="button">Processed Size <span class="sort-indicator"></span></button></th>
                                     <th data-col="rowsTotal"><button class="th-sort" data-table="runs" data-key="rowsTotal" type="button">Rows <span class="sort-indicator"></span></button></th>
                                     <th data-col="country"><button class="th-sort" data-table="runs" data-key="country" type="button">Country <span class="sort-indicator"></span></button></th>
                                     <th data-col="language"><button class="th-sort" data-table="runs" data-key="language" type="button">Lang <span class="sort-indicator"></span></button></th>
@@ -2506,7 +2506,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                                     <th><button class="th-sort" data-table="imports" data-key="status" type="button">Status <span class="sort-indicator"></span></button></th>
                                     <th><button class="th-sort" data-table="imports" data-key="analysisMs" type="button">Analysis <span class="sort-indicator"></span></button></th>
                                     <th><button class="th-sort" data-table="imports" data-key="filesProcessed" type="button">Files <span class="sort-indicator"></span></button></th>
-                                    <th><button class="th-sort" data-table="imports" data-key="bytesProcessed" type="button">Processed MB <span class="sort-indicator"></span></button></th>
+                                    <th><button class="th-sort" data-table="imports" data-key="bytesProcessed" type="button">Processed Size <span class="sort-indicator"></span></button></th>
                                     <th><button class="th-sort" data-table="imports" data-key="rowsTotal" type="button">Rows <span class="sort-indicator"></span></button></th>
                                     <th><button class="th-sort" data-table="imports" data-key="country" type="button">Country <span class="sort-indicator"></span></button></th>
                                     <th><button class="th-sort" data-table="imports" data-key="language" type="button">Lang <span class="sort-indicator"></span></button></th>
@@ -2532,12 +2532,21 @@ if (session_status() === PHP_SESSION_ACTIVE) {
 
                     <section class="panel">
                         <div class="card-title">
-                            <h3>Status and Language Mix</h3>
-                            <small>Quality + locale signal</small>
+                            <h3>Language Distribution</h3>
+                            <small>Selected/browser language signal</small>
                         </div>
-                        <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                            <div class="chart-wrap" style="height:210px;"><canvas id="chart-status"></canvas></div>
-                            <div class="chart-wrap" style="height:210px;"><canvas id="chart-languages"></canvas></div>
+                        <div class="card-body">
+                            <div class="chart-wrap" style="height:230px;"><canvas id="chart-languages"></canvas></div>
+                        </div>
+                    </section>
+
+                    <section class="panel">
+                        <div class="card-title">
+                            <h3>Status Mix</h3>
+                            <small>OK vs error ratio</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-wrap" style="height:230px;"><canvas id="chart-status"></canvas></div>
                         </div>
                     </section>
 
@@ -2710,7 +2719,11 @@ if (session_status() === PHP_SESSION_ACTIVE) {
 
             function fmtMb(bytes) {
                 const safe = Number.isFinite(bytes) ? Math.max(0, bytes) : 0;
-                return fmtFloat(safe / (1024 * 1024), 2) + ' MB';
+                if (safe <= 0) return '0 B';
+                if (safe < 1024) return fmtFloat(safe, 0) + ' B';
+                if (safe < (1024 * 1024)) return fmtFloat(safe / 1024, 2) + ' KB';
+                if (safe < (1024 * 1024 * 1024)) return fmtFloat(safe / (1024 * 1024), 2) + ' MB';
+                return fmtFloat(safe / (1024 * 1024 * 1024), 2) + ' GB';
             }
 
             function parseNumberLoose(value) {
@@ -3139,7 +3152,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
             }
 
             function renderCharts(stats) {
-                const timeline = buildTimeline(filtered);
+                const timeline = buildTimeline(entriesFromCurrentScope(true));
 
                 destroyChart(charts.activity);
                 const activityCtx = document.getElementById('chart-activity');
@@ -3517,8 +3530,13 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                 renderAlertCenter(stats, sli);
             }
 
-            function entriesFromCurrentScope() {
-                return Array.isArray(filtered) ? filtered : [];
+            function entriesFromCurrentScope(includeImports = false) {
+                const base = Array.isArray(filtered) ? filtered : [];
+                if (!includeImports) {
+                    return base;
+                }
+                const imports = Array.isArray(filteredImports) ? filteredImports : [];
+                return base.concat(imports);
             }
 
             function buildShareTimeline(entries) {

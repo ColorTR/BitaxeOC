@@ -266,3 +266,4 @@
 - v325: Sharing URL output was standardized to a single format ` /i?share=<token> `, the legacy `/r/<token>` alias flow was removed from frontend boot parsing, and import links were switched to `/import/<id>` in the autotune import API response.
 - v326: Rate-limit responses were enhanced with a computed `Retry-After` header for both file and DB transient-store paths, so clients can display remaining cooldown time reliably on 429 responses.
 - v327: Import telemetry was integrated into UsageLogger (`autotune_import_create` / `autotune_import_consume`) and Ops Panel gained a dedicated sortable "Recent Import Runs" table filtered with the same range/search scope as Recent Runs.
+- v328: Ops panel table size values were changed to adaptive B/KB/MB/GB formatting for small payload visibility, Run Activity Timeline started to include import runs, and a standalone "Language Distribution" panel was split under Country Distribution.
