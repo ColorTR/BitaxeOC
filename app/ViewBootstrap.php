@@ -8,11 +8,6 @@ final class ViewBootstrap
 {
     private static function extractRouteToken(array $server, array $query, string $basePath): string
     {
-        $fromQuery = strtolower(trim((string)($query['r'] ?? '')));
-        if ($fromQuery !== '' && preg_match('/^[a-f0-9]{16,80}$/', $fromQuery) === 1) {
-            return $fromQuery;
-        }
-
         $requestUri = (string)($server['REQUEST_URI'] ?? '');
         if ($requestUri === '') return '';
         $requestPath = (string)(parse_url($requestUri, PHP_URL_PATH) ?? '');
@@ -26,7 +21,7 @@ final class ViewBootstrap
         }
 
         $requestPath = '/' . ltrim($requestPath, '/');
-        if (!preg_match('/^\/r\/([a-f0-9]{16,80})\/?$/i', $requestPath, $match)) {
+        if (!preg_match('/^\/import\/([a-f0-9]{16,80})\/?$/i', $requestPath, $match)) {
             return '';
         }
 

@@ -1435,11 +1435,6 @@ $jsonJsFlags = JSON_HEX_TAG
         }
 
         function getImportTokenFromUrl() {
-            const serverToken = String(IMPORT_TOKEN_FROM_SERVER || '').trim().toLowerCase();
-            if (serverToken && IMPORT_TOKEN_PATTERN.test(serverToken)) {
-                return serverToken;
-            }
-
             const params = new URLSearchParams(window.location.search || '');
             const queryToken = String(params.get('import') || params.get('i') || '').trim().toLowerCase();
             if (queryToken && IMPORT_TOKEN_PATTERN.test(queryToken)) {
@@ -1447,15 +1442,18 @@ $jsonJsFlags = JSON_HEX_TAG
             }
 
             const pathname = String(window.location.pathname || '');
-            const routeMatch = pathname.match(/\/r\/([a-f0-9]{16,80})\/?$/i);
-            if (routeMatch) {
-                const routeToken = String(routeMatch[1] || '').trim().toLowerCase();
-                if (IMPORT_TOKEN_PATTERN.test(routeToken)) return routeToken;
-            }
             const pathMatch = pathname.match(/\/import\/([a-f0-9]{16,80})\/?$/i);
-            if (!pathMatch) return '';
-            const token = String(pathMatch[1] || '').trim().toLowerCase();
-            return IMPORT_TOKEN_PATTERN.test(token) ? token : '';
+            if (pathMatch) {
+                const token = String(pathMatch[1] || '').trim().toLowerCase();
+                if (IMPORT_TOKEN_PATTERN.test(token)) return token;
+            }
+
+            const serverToken = String(IMPORT_TOKEN_FROM_SERVER || '').trim().toLowerCase();
+            if (serverToken && IMPORT_TOKEN_PATTERN.test(serverToken)) {
+                return serverToken;
+            }
+
+            return '';
         }
 
         function clearImportTokenFromUrl() {
@@ -1490,15 +1488,9 @@ $jsonJsFlags = JSON_HEX_TAG
         function buildShortShareUrl(token) {
             const normalizedToken = String(token || '').trim().toLowerCase();
             if (!normalizedToken) return '';
-            if (normalizedToken === SHARE_STATIC_TEST_TOKEN) {
-                const staticUrl = new URL(pathWithBase('/i'), window.location.origin);
-                staticUrl.searchParams.set('share', SHARE_STATIC_TEST_TOKEN);
-                staticUrl.searchParams.delete('s');
-                staticUrl.hash = '';
-                return staticUrl.toString();
-            }
-            const routePath = pathWithBase(`/r/${normalizedToken}`);
-            const url = new URL(routePath, window.location.origin);
+            const url = new URL(pathWithBase('/i'), window.location.origin);
+            url.searchParams.set('share', normalizedToken);
+            url.searchParams.delete('s');
             url.hash = '';
             return url.toString();
         }
@@ -1575,6 +1567,7 @@ $jsonJsFlags = JSON_HEX_TAG
 
             applyFilterState({});
             recomputeAndRender(true);
+            scheduleDataQualityAutoClose(DATA_QUALITY_AUTO_CLOSE_DELAY_MS);
             setShareReadOnlyMode(false);
             activateDashboardView({ allowUpload: true });
             syncControlVisibility();
@@ -1702,9 +1695,10 @@ $jsonJsFlags = JSON_HEX_TAG
             }
         }
 
-        async function loadSharedReportFromUrl(tokenCandidate = '') {
+        async function loadSharedReportFromUrl(tokenCandidate = '', options = {}) {
             const token = String(tokenCandidate || getShareTokenFromUrl()).trim().toLowerCase();
             if (!token) return false;
+            const silent = Boolean(options?.silent);
 
             try {
                 if (token === SHARE_STATIC_TEST_TOKEN) {
@@ -1754,7 +1748,9 @@ $jsonJsFlags = JSON_HEX_TAG
                 );
 
                 if (response.status === 404) {
-                    showInAppToast(t('alert.shareNotFound'), 'error', 7000);
+                    if (!silent) {
+                        showInAppToast(t('alert.shareNotFound'), 'error', 7000);
+                    }
                     return false;
                 }
 
@@ -1783,6 +1779,7 @@ $jsonJsFlags = JSON_HEX_TAG
                 syncControlVisibility();
                 return true;
             } catch (error) {
+                if (silent) return false;
                 const message = String(error?.message || '').trim();
                 if (message && !['share_load_failed', 'share_payload_invalid'].includes(message)) {
                     showInAppToast(message, 'error', 7000);
@@ -7147,8 +7144,8 @@ $jsonJsFlags = JSON_HEX_TAG
             renderDataQualitySummary(false);
             refreshFilterControlsFromData();
             syncControlVisibility();
-            const requestedImportToken = getImportTokenFromUrl();
             const requestedShareToken = getShareTokenFromUrl();
+            const requestedImportToken = getImportTokenFromUrl();
             if (requestedImportToken || requestedShareToken) {
                 setUploadOverlayShareLoadingHidden(true);
                 if (refs.uploadSection) {
@@ -7173,11 +7170,16 @@ $jsonJsFlags = JSON_HEX_TAG
                 }
             }
 
-            const importedLoaded = await loadAutotuneImportFromUrl(requestedImportToken);
-            if (importedLoaded) return;
-            const shareLoadCandidate = requestedShareToken || requestedImportToken;
-            const sharedLoaded = await loadSharedReportFromUrl(shareLoadCandidate);
-            if (sharedLoaded) return;
+            if (requestedShareToken) {
+                const sharedLoaded = await loadSharedReportFromUrl(requestedShareToken);
+                if (sharedLoaded) return;
+            }
+
+            if (requestedImportToken) {
+                const importedLoaded = await loadAutotuneImportFromUrl(requestedImportToken);
+                if (importedLoaded) return;
+            }
+
             if (requestedImportToken && !requestedShareToken) {
                 keepUploadOverlayClosedOnBoot = true;
                 setShareReadOnlyMode(false);

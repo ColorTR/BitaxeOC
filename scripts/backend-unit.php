@@ -132,7 +132,7 @@ $run('View bootstrap canonical + robots', static function (): string {
         throw new RuntimeException('import robots mismatch');
     }
     $serverRoute = $server;
-    $serverRoute['REQUEST_URI'] = '/r/' . str_repeat('c', 16);
+    $serverRoute['REQUEST_URI'] = '/import/' . str_repeat('c', 16);
     $ctxRoute = ViewBootstrap::forIndex($cfg, $serverRoute, []);
     if (($ctxRoute['seoRobots'] ?? '') !== 'noindex,nofollow,noarchive') {
         throw new RuntimeException('route robots mismatch');
