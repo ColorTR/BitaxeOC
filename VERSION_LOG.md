@@ -269,3 +269,4 @@
 - v328: Ops panel table size values were changed to adaptive B/KB/MB/GB formatting for small payload visibility, Run Activity Timeline started to include import runs, and a standalone "Language Distribution" panel was split under Country Distribution.
 - v329: Autotune import now reuses the existing ticket for same-client + same-CSV requests (instead of always creating a new token), and consumed tickets can be safely re-read by the same client context; import API logs also distinguish reuse via `autotune_import_reuse`.
 - v330: High-confidence dead-code cleanup removed orphaned analyzer/security helpers and unused ops-panel formatter/DB wrapper functions without changing runtime behavior.
+- v331: Ops panel Run Activity Timeline windowing bug was fixed; `all/30d/90d` now honor selected range instead of falling back to a hardcoded 48h horizon, with dynamic bucket sizing and caption sync.

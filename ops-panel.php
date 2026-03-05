@@ -2802,6 +2802,44 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                 return now - map[range];
             }
 
+            function resolveTimelineWindow(entries) {
+                const now = Date.now();
+                const fixedRanges = {
+                    '24h': 24 * 3600 * 1000,
+                    '7d': 7 * 24 * 3600 * 1000,
+                    '30d': 30 * 24 * 3600 * 1000,
+                    '90d': 90 * 24 * 3600 * 1000,
+                };
+
+                let horizonMs = Number(fixedRanges[currentRange] || 0);
+                if (horizonMs <= 0) {
+                    let minTs = 0;
+                    for (const row of entries) {
+                        const ts = toTs(row.createdAt);
+                        if (!ts) continue;
+                        if (!minTs || ts < minTs) {
+                            minTs = ts;
+                        }
+                    }
+                    horizonMs = minTs > 0 ? Math.max(24 * 3600 * 1000, now - minTs) : (48 * 3600 * 1000);
+                }
+
+                horizonMs = Math.max(3600 * 1000, horizonMs);
+                const targetBuckets = 48;
+                const oneHourMs = 3600 * 1000;
+                const bucketMs = Math.max(oneHourMs, Math.ceil(horizonMs / targetBuckets / oneHourMs) * oneHourMs);
+                const bucketCount = Math.max(1, Math.ceil(horizonMs / bucketMs));
+                const start = now - (bucketCount * bucketMs);
+
+                let label = 'All time';
+                if (currentRange === '24h') label = 'Last 24h';
+                else if (currentRange === '7d') label = 'Last 7d';
+                else if (currentRange === '30d') label = 'Last 30d';
+                else if (currentRange === '90d') label = 'Last 90d';
+
+                return { start, horizonMs: bucketCount * bucketMs, bucketMs, bucketCount, label };
+            }
+
             function normalizeSearchText(entry) {
                 return [
                     entry.status,
@@ -2941,14 +2979,15 @@ if (session_status() === PHP_SESSION_ACTIVE) {
 
             function buildTimeline(entries) {
                 if (entries.length === 0) {
-                    return { labels: [], okSeries: [], errSeries: [] };
+                    return { labels: [], okSeries: [], errSeries: [], bucketCount: 0, label: 'No data' };
                 }
 
                 const buckets = new Map();
-                const now = Date.now();
-                const horizonMs = currentRange === '24h' ? 24 * 3600 * 1000 : (currentRange === '7d' ? 7 * 24 * 3600 * 1000 : 48 * 3600 * 1000);
-                const bucketMs = currentRange === '7d' ? 6 * 3600 * 1000 : 3600 * 1000;
-                const start = now - horizonMs;
+                const windowCfg = resolveTimelineWindow(entries);
+                const start = windowCfg.start;
+                const bucketMs = windowCfg.bucketMs;
+                const bucketCount = windowCfg.bucketCount;
+                const showHour = windowCfg.horizonMs <= (14 * 24 * 3600 * 1000);
 
                 for (const row of entries) {
                     const ts = toTs(row.createdAt);
@@ -2970,21 +3009,18 @@ if (session_status() === PHP_SESSION_ACTIVE) {
                 const okSeries = [];
                 const errSeries = [];
 
-                const bucketCount = Math.ceil(horizonMs / bucketMs);
                 for (let i = 0; i < bucketCount; i++) {
                     const bucketStart = start + (i * bucketMs);
                     const key = String(bucketStart);
                     const item = buckets.get(key) || { ok: 0, err: 0 };
-                    labels.push(new Date(bucketStart).toLocaleString([], {
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                    }));
+                    labels.push(new Date(bucketStart).toLocaleString([], showHour
+                        ? { month: '2-digit', day: '2-digit', hour: '2-digit' }
+                        : { month: '2-digit', day: '2-digit' }));
                     okSeries.push(item.ok);
                     errSeries.push(item.err);
                 }
 
-                return { labels, okSeries, errSeries };
+                return { labels, okSeries, errSeries, bucketCount, label: windowCfg.label };
             }
 
             function renderCards(stats) {
@@ -3024,6 +3060,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
 
             function renderCharts(stats) {
                 const timeline = buildTimeline(entriesFromCurrentScope(true));
+                setText('timeline-caption', timeline.label + ' | ' + fmtInt(timeline.bucketCount) + ' buckets');
 
                 destroyChart(charts.activity);
                 const activityCtx = document.getElementById('chart-activity');
