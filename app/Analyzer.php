@@ -255,22 +255,6 @@ final class Analyzer
         return in_array($mimeLower, ['text/plain', 'application/vnd.ms-excel'], true);
     }
 
-    private function parseCsv(string $text): array
-    {
-        $cleaned = trim(preg_replace('/^\xEF\xBB\xBF/u', '', $text) ?? '');
-        if ($cleaned === '') {
-            return $this->parseCsvLines([]);
-        }
-
-        $linesRaw = preg_split('/\r\n|\n|\r/', $cleaned);
-        if (!is_array($linesRaw)) {
-            $linesRaw = [];
-        }
-
-        $lines = $this->collectNonEmptyLines($linesRaw);
-        return $this->parseCsvLines($lines);
-    }
-
     private function parseCsvFile(string $path): array
     {
         if ($path === '' || !is_file($path) || !is_readable($path)) {

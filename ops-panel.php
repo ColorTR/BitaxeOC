@@ -88,29 +88,6 @@ function nfmt2(mixed $value, int $digits = 0): string
     return number_format($float, $digits, '.', ',');
 }
 
-function mbfmt2(mixed $bytes, int $digits = 2): string
-{
-    if (!is_numeric($bytes)) {
-        return '-';
-    }
-
-    $mb = ((float)$bytes) / (1024 * 1024);
-    if (is_nan($mb) || is_infinite($mb)) {
-        return '-';
-    }
-
-    return nfmt2($mb, $digits) . ' MB';
-}
-
-function pctfmt2(?float $value, int $digits = 1): string
-{
-    if (!is_numeric($value)) {
-        return '-';
-    }
-    $clamped = max(0.0, min(999.0, (float)$value));
-    return nfmt2($clamped, $digits) . '%';
-}
-
 $config = require __DIR__ . '/app/Config.php';
 $securityConfig = is_array($config['security'] ?? null) ? $config['security'] : [];
 $adminConfig = is_array($config['admin'] ?? null) ? $config['admin'] : [];
@@ -567,11 +544,6 @@ if (isset($_SESSION[$flashErrorSessionKey]) && is_string($_SESSION[$flashErrorSe
     unset($_SESSION[$flashErrorSessionKey]);
 }
 
-function h(string $value): string
-{
-    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-}
-
 function nfmt(mixed $value, int $digits = 0): string
 {
     if (!is_numeric($value)) {
@@ -583,102 +555,6 @@ function nfmt(mixed $value, int $digits = 0): string
     }
 
     return number_format($float, $digits, '.', ',');
-}
-
-function mbfmt(mixed $bytes, int $digits = 2): string
-{
-    if (!is_numeric($bytes)) {
-        return '-';
-    }
-
-    $mb = ((float)$bytes) / (1024 * 1024);
-    if (is_nan($mb) || is_infinite($mb)) {
-        return '-';
-    }
-
-    return nfmt($mb, $digits) . ' MB';
-}
-
-function msfmt(mixed $ms): string
-{
-    if (!is_numeric($ms)) {
-        return '-';
-    }
-    $value = (float)$ms;
-    if (is_nan($value) || is_infinite($value)) {
-        return '-';
-    }
-    if ($value < 1) {
-        return '0 ms';
-    }
-    return nfmt($value, $value < 100 ? 1 : 0) . ' ms';
-}
-
-function countryLabel(string $code): string
-{
-    static $labels = [
-        'TR' => 'Turkiye',
-        'US' => 'United States',
-        'DE' => 'Germany',
-        'GB' => 'United Kingdom',
-        'RU' => 'Russia',
-        'CN' => 'China',
-        'FR' => 'France',
-        'NL' => 'Netherlands',
-        'IN' => 'India',
-        'BR' => 'Brazil',
-        'CA' => 'Canada',
-        'AU' => 'Australia',
-        'JP' => 'Japan',
-        'KR' => 'South Korea',
-        'ES' => 'Spain',
-        'IT' => 'Italy',
-        'PL' => 'Poland',
-        'UA' => 'Ukraine',
-        'ID' => 'Indonesia',
-        'VN' => 'Vietnam',
-        'MX' => 'Mexico',
-        'AR' => 'Argentina',
-        'AE' => 'United Arab Emirates',
-        'SA' => 'Saudi Arabia',
-        'EG' => 'Egypt',
-        'ZZ' => 'Unknown',
-    ];
-    $normalized = strtoupper(trim($code));
-    if ($normalized === '' || !preg_match('/^[A-Z]{2}$/', $normalized)) {
-        return 'Unknown';
-    }
-    return $labels[$normalized] ?? $normalized;
-}
-
-function languageLabel(string $code): string
-{
-    static $labels = [
-        'tr' => 'Turkish',
-        'en' => 'English',
-        'ar' => 'Arabic',
-        'de' => 'German',
-        'fr' => 'French',
-        'es' => 'Spanish',
-        'it' => 'Italian',
-        'ru' => 'Russian',
-        'pt' => 'Portuguese',
-        'pl' => 'Polish',
-        'nl' => 'Dutch',
-        'id' => 'Indonesian',
-        'zh' => 'Chinese',
-        'ja' => 'Japanese',
-        'ko' => 'Korean',
-        'unknown' => 'Unknown',
-    ];
-    $normalized = strtolower(trim($code));
-    if ($normalized === '' || $normalized === 'auto') {
-        return 'Unknown';
-    }
-    if (str_contains($normalized, '-')) {
-        $normalized = explode('-', $normalized, 2)[0];
-    }
-    return $labels[$normalized] ?? strtoupper($normalized);
 }
 
 function sizefmt(mixed $bytes, int $digits = 2): string
@@ -924,11 +800,6 @@ function collectTopProcessMetricsCached(array $config): array
 function normalizeOpsDbTableName(string $value, string $fallback): string
 {
     return OpsDbMetrics::normalizeTableName($value, $fallback);
-}
-
-function buildOpsDbCandidates(array $config): array
-{
-    return OpsDbMetrics::buildCandidates($config);
 }
 
 function createOpsDbConnectionMeta(array $config): ?array

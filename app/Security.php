@@ -213,25 +213,6 @@ final class Security
         );
     }
 
-    public static function applyRateLimit(
-        string $scope,
-        int $limit,
-        int $windowSec,
-        ?string $clientIdentity = null
-    ): void {
-        if ($limit <= 0 || $windowSec <= 0) {
-            return;
-        }
-
-        SecurityTransientStore::applyRateLimitLegacyFile(
-            $scope,
-            $limit,
-            $windowSec,
-            $clientIdentity,
-            static fn (): string => self::getClientIp(false)
-        );
-    }
-
     public static function applyRateLimitConfig(
         array $securityConfig,
         string $scope,

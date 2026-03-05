@@ -960,7 +960,7 @@ async function run() {
     return filename;
   });
 
-  await runTest('Import route: frontend API paths stay absolute under /r/<id>', async () => {
+  await runTest('Import route: frontend API paths stay absolute under /import/<id>', async () => {
     const csvBody = [
       'voltage,frequency,hashrate,temp,vrTemp,errorRate,efficiency,power',
       '1270,832,3426,60,70,0.46,16.11,55.2'
@@ -986,7 +986,7 @@ async function run() {
 
     assert(create.res.status === 201, `Expected 201, got ${create.res.status}`);
     const importPath = String(create.data?.import?.importPath || '').trim();
-    assert(importPath.startsWith('/r/'), `Invalid importPath: ${importPath}`);
+    assert(importPath.startsWith('/import/'), `Invalid importPath: ${importPath}`);
 
     const importPage = await fetchWithTiming(`${baseOrigin}${importPath}`, {
       method: 'GET',
@@ -1006,12 +1006,13 @@ async function run() {
     return importPath;
   });
 
-  await runTest('Frontend share URL builder uses short /r/<token> format', async () => {
+  await runTest('Frontend share URL builder uses canonical /i?share=<token> format', async () => {
     assert(
-      indexHtml.includes("const routePath = pathWithBase(`/r/${normalizedToken}`);"),
-      'Share URL builder is not using /r/<token> route'
+      indexHtml.includes("const url = new URL(pathWithBase('/i'), window.location.origin);") &&
+        indexHtml.includes("url.searchParams.set('share', normalizedToken);"),
+      'Share URL builder is not using /i?share=<token> route'
     );
-    return 'share-route-builder=/r/<token>';
+    return 'share-route-builder=/i?share=<token>';
   });
 
   await runTest('Frontend assets: local tailwind asset is referenced', async () => {
