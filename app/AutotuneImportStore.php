@@ -153,14 +153,22 @@ final class AutotuneImportStore
 
         $createdAtTs = time();
         $expiresAtTs = $createdAtTs + $ttlSec;
+        $csvHash = hash('sha256', $normalized['csv']);
+        $csvBytes = strlen($normalized['csv']);
+
+        $existing = $this->findReusableFileTicket($csvHash, $normalized['source'], $ctx);
+        if ($existing !== null) {
+            return $existing;
+        }
+
         $record = [
             'version' => 1,
             'import_id' => '',
             'source' => $normalized['source'],
             'filename' => $normalized['filename'],
             'csv' => $normalized['csv'],
-            'csv_sha256' => hash('sha256', $normalized['csv']),
-            'csv_bytes' => strlen($normalized['csv']),
+            'csv_sha256' => $csvHash,
+            'csv_bytes' => $csvBytes,
             'payload_timestamp' => $normalized['timestamp'],
             'created_at' => gmdate('c', $createdAtTs),
             'expires_at' => gmdate('c', $expiresAtTs),
@@ -253,6 +261,22 @@ final class AutotuneImportStore
 
             $consumedAt = trim((string)($decoded['consumed_at'] ?? ''));
             if ($consumedAt !== '') {
+                if ($this->canReuseConsumedRecord($decoded, $ctx)) {
+                    return [
+                        'state' => 'ok',
+                        'record' => [
+                            'id' => $importId,
+                            'source' => (string)($decoded['source'] ?? 'axeos'),
+                            'filename' => (string)($decoded['filename'] ?? 'autotune_report.csv'),
+                            'csv' => (string)($decoded['csv'] ?? ''),
+                            'csvHash' => (string)($decoded['csv_sha256'] ?? hash('sha256', (string)($decoded['csv'] ?? ''))),
+                            'bytes' => max(0, (int)($decoded['csv_bytes'] ?? strlen((string)($decoded['csv'] ?? '')))),
+                            'createdAt' => (string)($decoded['created_at'] ?? ''),
+                            'expiresAt' => $expiresAt,
+                            'consumedAt' => $consumedAt,
+                        ],
+                    ];
+                }
                 return [
                     'state' => 'consumed',
                     'record' => [
@@ -317,6 +341,11 @@ final class AutotuneImportStore
         $csvBytes = strlen($normalized['csv']);
         $tableSql = $this->quotedDbTable();
 
+        $existing = $this->findReusableDbTicket($pdo, $csvHash, $normalized['source'], $ctx);
+        if ($existing !== null) {
+            return $existing;
+        }
+
         for ($attempt = 0; $attempt < 20; $attempt++) {
             $importId = bin2hex(random_bytes($this->idBytes));
             if (!$this->isValidImportId($importId)) {
@@ -370,7 +399,7 @@ final class AutotuneImportStore
         try {
             $pdo->beginTransaction();
 
-            $selectSql = "SELECT id, import_id, source, filename, csv_body, csv_sha256, csv_bytes, created_at, expires_at, consumed_at FROM {$tableSql} WHERE import_id = :import_id LIMIT 1 FOR UPDATE";
+            $selectSql = "SELECT id, import_id, source, filename, csv_body, csv_sha256, csv_bytes, created_at, expires_at, consumed_at, created_ip, created_origin, created_user_agent, consume_ip, consume_origin, consume_user_agent FROM {$tableSql} WHERE import_id = :import_id LIMIT 1 FOR UPDATE";
             $selectStmt = $pdo->prepare($selectSql);
             $selectStmt->execute([':import_id' => $importId]);
             $row = $selectStmt->fetch(PDO::FETCH_ASSOC);
@@ -389,6 +418,12 @@ final class AutotuneImportStore
             $consumedAtRaw = trim((string)($row['consumed_at'] ?? ''));
             if ($consumedAtRaw !== '') {
                 $pdo->rollBack();
+                if ($this->canReuseConsumedRecord($row, $ctx)) {
+                    return [
+                        'state' => 'ok',
+                        'record' => $this->mapDbRecord($row, true),
+                    ];
+                }
                 return [
                     'state' => 'consumed',
                     'record' => $this->mapDbRecord($row, false),
@@ -709,6 +744,175 @@ final class AutotuneImportStore
             'expiresAt' => $expiresAtTs > 0 ? gmdate('c', $expiresAtTs) : '',
             'consumedAt' => $consumedAtTs > 0 ? gmdate('c', $consumedAtTs) : '',
         ];
+    }
+
+    /**
+     * @param array<string,mixed> $record
+     * @param array{ip:string,origin:string,userAgent:string} $ctx
+     */
+    private function contextMatchesRecord(array $record, array $ctx, string $prefix): bool
+    {
+        $recordIp = trim((string)($record[$prefix . 'ip'] ?? ''));
+        $ctxIp = trim((string)($ctx['ip'] ?? ''));
+        if ($recordIp !== '' && $ctxIp !== '' && !hash_equals($recordIp, $ctxIp)) {
+            return false;
+        }
+        if ($recordIp !== '' && $ctxIp === '') {
+            return false;
+        }
+
+        $recordUa = trim((string)($record[$prefix . 'user_agent'] ?? ''));
+        $ctxUa = trim((string)($ctx['userAgent'] ?? ''));
+        if ($recordUa !== '' && $ctxUa !== '' && !hash_equals($recordUa, $ctxUa)) {
+            return false;
+        }
+        if ($recordUa !== '' && $ctxUa === '') {
+            return false;
+        }
+
+        $recordOrigin = trim((string)($record[$prefix . 'origin'] ?? ''));
+        $ctxOrigin = trim((string)($ctx['origin'] ?? ''));
+        if ($recordOrigin !== '' && $ctxOrigin !== '' && !hash_equals($recordOrigin, $ctxOrigin)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param array<string,mixed> $record
+     * @param array{ip:string,origin:string,userAgent:string} $ctx
+     */
+    private function canReuseConsumedRecord(array $record, array $ctx): bool
+    {
+        $consumedAt = trim((string)($record['consumed_at'] ?? ($record['consumedAt'] ?? '')));
+        if ($consumedAt === '') {
+            return false;
+        }
+
+        if ($this->contextMatchesRecord($record, $ctx, 'consume_')) {
+            return true;
+        }
+
+        return $this->contextMatchesRecord($record, $ctx, 'created_');
+    }
+
+    /**
+     * @param array{ip:string,origin:string,userAgent:string} $ctx
+     * @return array{id:string,source:string,filename:string,csvHash:string,bytes:int,createdAt:string,expiresAt:string,reused:bool}|null
+     */
+    private function findReusableFileTicket(string $csvHash, string $source, array $ctx): ?array
+    {
+        $files = glob($this->storageDir . '/import_*.json');
+        if (!is_array($files) || !$files) {
+            return null;
+        }
+
+        $now = time();
+        $bestRecord = null;
+        $bestCreatedAtTs = 0;
+
+        foreach ($files as $file) {
+            if (!is_file($file)) {
+                continue;
+            }
+            $raw = @file_get_contents($file);
+            if (!is_string($raw) || trim($raw) === '') {
+                continue;
+            }
+            $decoded = json_decode($raw, true);
+            if (!is_array($decoded)) {
+                continue;
+            }
+
+            $importId = strtolower(trim((string)($decoded['import_id'] ?? '')));
+            if (!$this->isValidImportId($importId)) {
+                continue;
+            }
+            if ((string)($decoded['csv_sha256'] ?? '') !== $csvHash) {
+                continue;
+            }
+            if ((string)($decoded['source'] ?? 'axeos') !== $source) {
+                continue;
+            }
+
+            $expiresAtTs = strtotime((string)($decoded['expires_at'] ?? ''));
+            if ($expiresAtTs === false || $expiresAtTs <= $now) {
+                continue;
+            }
+            if (!$this->contextMatchesRecord($decoded, $ctx, 'created_')) {
+                continue;
+            }
+
+            $createdAtTs = strtotime((string)($decoded['created_at'] ?? ''));
+            if ($createdAtTs === false) {
+                $createdAtTs = 0;
+            }
+            if ($bestRecord === null || $createdAtTs >= $bestCreatedAtTs) {
+                $bestRecord = $decoded;
+                $bestCreatedAtTs = $createdAtTs;
+            }
+        }
+
+        if (!is_array($bestRecord)) {
+            return null;
+        }
+
+        return [
+            'id' => strtolower(trim((string)($bestRecord['import_id'] ?? ''))),
+            'source' => (string)($bestRecord['source'] ?? 'axeos'),
+            'filename' => (string)($bestRecord['filename'] ?? 'autotune_report.csv'),
+            'csvHash' => (string)($bestRecord['csv_sha256'] ?? ''),
+            'bytes' => max(0, (int)($bestRecord['csv_bytes'] ?? 0)),
+            'createdAt' => (string)($bestRecord['created_at'] ?? ''),
+            'expiresAt' => (string)($bestRecord['expires_at'] ?? ''),
+            'reused' => true,
+        ];
+    }
+
+    /**
+     * @param array{ip:string,origin:string,userAgent:string} $ctx
+     * @return array{id:string,source:string,filename:string,csvHash:string,bytes:int,createdAt:string,expiresAt:string,reused:bool}|null
+     */
+    private function findReusableDbTicket(PDO $pdo, string $csvHash, string $source, array $ctx): ?array
+    {
+        $tableSql = $this->quotedDbTable();
+        $sql = "SELECT import_id, source, filename, csv_sha256, csv_bytes, created_at, expires_at, consumed_at, created_ip, created_origin, created_user_agent, consume_ip, consume_origin, consume_user_agent FROM {$tableSql} WHERE csv_sha256 = :csv_sha256 AND source = :source AND expires_at > :now ORDER BY created_at DESC LIMIT 40";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':csv_sha256' => $csvHash,
+            ':source' => $source,
+            ':now' => $this->dbDateTime(time()),
+        ]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!is_array($rows) || !$rows) {
+            return null;
+        }
+
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            if (!$this->contextMatchesRecord($row, $ctx, 'created_')) {
+                continue;
+            }
+            $record = $this->mapDbRecord($row, false);
+            if (($record['id'] ?? '') === '') {
+                continue;
+            }
+            return [
+                'id' => (string)$record['id'],
+                'source' => (string)$record['source'],
+                'filename' => (string)$record['filename'],
+                'csvHash' => (string)$record['csvHash'],
+                'bytes' => max(0, (int)$record['bytes']),
+                'createdAt' => (string)$record['createdAt'],
+                'expiresAt' => (string)$record['expiresAt'],
+                'reused' => true,
+            ];
+        }
+
+        return null;
     }
 
     private function ensureStorageDirectory(): void

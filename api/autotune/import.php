@@ -405,17 +405,19 @@ try {
     $csvBody = (string)($payload['csv'] ?? '');
     $bytes = max(0, (int)($created['bytes'] ?? strlen($csvBody)));
     $rows = $estimateCsvRows($csvBody);
+    $isReused = !empty($created['reused']);
+    $statusCode = $isReused ? 200 : 201;
     $logImportEvent(
-        'autotune_import_create',
+        $isReused ? 'autotune_import_reuse' : 'autotune_import_create',
         'ok',
-        201,
+        $statusCode,
         '',
         1,
-        1,
+        $isReused ? 0 : 1,
         $bytes,
-        $bytes,
-        $rows,
-        $rows,
+        $isReused ? 0 : $bytes,
+        $isReused ? 0 : $rows,
+        $isReused ? 0 : $rows,
         0
     );
 
@@ -434,9 +436,9 @@ try {
             'importUrl' => $importUrl,
             'consumePath' => $consumePath,
             'consumeUrl' => $consumeUrl,
-            'reused' => !empty($created['reused']),
+            'reused' => $isReused,
         ],
-    ], 201);
+    ], $statusCode);
 } catch (HttpException $error) {
     $originHeader = trim((string)($_SERVER['HTTP_ORIGIN'] ?? ''));
     if ($originHeader !== '') {

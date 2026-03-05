@@ -267,3 +267,4 @@
 - v326: Rate-limit responses were enhanced with a computed `Retry-After` header for both file and DB transient-store paths, so clients can display remaining cooldown time reliably on 429 responses.
 - v327: Import telemetry was integrated into UsageLogger (`autotune_import_create` / `autotune_import_consume`) and Ops Panel gained a dedicated sortable "Recent Import Runs" table filtered with the same range/search scope as Recent Runs.
 - v328: Ops panel table size values were changed to adaptive B/KB/MB/GB formatting for small payload visibility, Run Activity Timeline started to include import runs, and a standalone "Language Distribution" panel was split under Country Distribution.
+- v329: Autotune import now reuses the existing ticket for same-client + same-CSV requests (instead of always creating a new token), and consumed tickets can be safely re-read by the same client context; import API logs also distinguish reuse via `autotune_import_reuse`.

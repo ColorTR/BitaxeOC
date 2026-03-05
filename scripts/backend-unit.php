@@ -433,6 +433,23 @@ $run('Autotune import file mode one-time consume + filename hardening', static f
             throw new RuntimeException('filename hardening failed');
         }
 
+        $createdAgain = $store->create([
+            'source' => 'axeos<script>alert(1)</script>',
+            'filename' => '../../<img src=x onerror=alert(1)>.csv',
+            'csv' => "voltage,frequency,hashrate,temp,vrTemp,errorRate\n1270,832,3426,58,69,0.4",
+            'timestamp' => time(),
+        ], 600, [
+            'ip' => '127.0.0.1',
+            'origin' => 'https://bitaxe.colortr.com',
+            'userAgent' => 'unit-test',
+        ]);
+        if (($createdAgain['id'] ?? '') !== $importId) {
+            throw new RuntimeException('duplicate import create should reuse same id');
+        }
+        if (empty($createdAgain['reused'])) {
+            throw new RuntimeException('duplicate import create should set reused=true');
+        }
+
         $first = $store->consume($importId, [
             'ip' => '127.0.0.1',
             'origin' => 'https://oc.colortr.com',
